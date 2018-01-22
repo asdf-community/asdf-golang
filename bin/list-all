@@ -1,8 +1,58 @@
 #!/usr/bin/env bash
+set -eu
+[ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
+IFS=$'\n\t'
 
-curl --silent https://storage.googleapis.com/golang \
-    | sed -e $'s/<Key>\([^<]*\)<\/Key>/\\\n\\1\\\n/g' \
+# This method is not stable, according to https://github.com/golang/go/issues/21667#issuecomment-325457742
+BASE_URL='https://storage.googleapis.com/golang?marker='
+NEXT_MARKER=''
+TRUNCATED='true'
+
+# Shamelessly stolen from: https://stackoverflow.com/questions/893585/how-to-parse-xml-in-bash {
+function read_dom() {
+    local IFS=\>
+    read -d \< ENTITY CONTENT
+    local RET=$?
+    TAG_NAME=${ENTITY%% *}
+    ATTRIBUTES=${ENTITY#* }
+    return $RET
+}
+
+function parse_dom() {
+  if [[ $TAG_NAME = "IsTruncated" ]] ; then
+    #echo "Is this page truncated: $CONTENT"
+    TRUNCATED=$CONTENT
+  elif [[ $TAG_NAME = "NextMarker" ]] ; then
+    #echo "What is the next marker: $CONTENT"
+    NEXT_MARKER=$CONTENT
+  elif [[ $TAG_NAME = "Key" ]] ; then
+    VERSIONS+=("${CONTENT}")
+  fi
+}
+
+function get_versions() {
+  XML=$(curl --silent ${BASE_URL}${NEXT_MARKER})
+
+  while read_dom; do
+      parse_dom
+  done <<< $XML
+}
+# }
+
+function loop_versions() {
+  if [[ $TRUNCATED = 'true' ]] ; then
+    get_versions
+    loop_versions
+  fi
+}
+
+loop_versions
+
+echo ${VERSIONS[@]} \
+    | tr ' ' '\n' \
     | grep '.tar.gz' \
+    | grep '\(linux\|darwin\|freebsd\)' \
+    | grep '\-\(amd64\|386\)\.' \
     | sed -e 's/^go\([^.]*\).\([^.]*\).\([^.]*\).*/\1.\2.\3/' \
     | sed -e 's/.\(linux\|darwin\|freebsd\|src\).*$//' \
     | uniq \

@@ -1,31 +1,56 @@
 #!/usr/bin/env bash
+set -eu
+[ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
+
+get_platform () {
+    local platform="$(uname | tr '[:upper:]' '[:lower:]')"
+
+    case "$platform" in
+        linux|darwin|freebsd)
+            echo "Platform '${platform}' supported!" >&2
+            ;;
+        *)
+            echo "Platform '${platform}' not supported!" >&2
+            exit 1
+            ;;
+    esac
+
+    echo -n $platform
+}
+
+get_arch () {
+    local arch=""
+
+    case "$(uname -m)" in
+        x86_64|amd64) arch="amd64"; ;;
+        i686|i386) arch="386"; ;;
+        armv6l|armv7l) arch="armv6l"; ;;
+        *)
+            echo "Arch '$(uname -m)' not supported!" >&2
+            exit 1
+            ;;
+    esac
+
+    echo -n $arch
+}
+
+my_mktemp () {
+    local tempdir=""
+    if [ "linux" = "$1" ] ; then
+        tempdir=$(mktemp -d asdf-golang.XXXX)
+    else
+        tempdir=$(mktemp -dt asdf-golang)
+    fi
+    echo -n $tempdir
+}
 
 install_golang () {
     local install_type=$1
     local version=$2
     local install_path=$3
-    local platform=""
-    local arch=""
-    local tempdir=""
-
-    [ "Linux" = "$(uname)" ] && platform="linux" || platform="darwin"
-    local uname_platform="$(uname)"
-    case "$uname_platform" in
-        Linux) platform="linux";;
-        Darwin) platform="darwin";;
-        *) echo "Platform not supported: $uname_platform" && exit 1
-    esac
-
-    case "$(uname -m)" in
-        amd64) arch="amd64";;
-        i386) arch="386";;
-        i686) arch="386";;
-        armv6l) arch="armv6l";;
-        armv7l) arch="armv6l";;
-        *) echo "Unknown architecture: $(uname -m)" && exit 1 
-    esac    
-
-    [ "linux" = "${platform}" ] && tempdir=$(mktemp -d asdf-golang.XXXXXX) || tempdir=$(mktemp -dt asdf-golang)
+    local platform=$(get_platform)
+    local arch=$(get_arch)
+    local tempdir=$(my_mktemp $platform)
 
     curl "https://storage.googleapis.com/golang/go${version}.${platform}-${arch}.tar.gz" -o "${tempdir}/archive.tar.gz"
 
