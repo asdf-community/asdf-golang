@@ -46,6 +46,14 @@ function loop_versions() {
   fi
 }
 
+mysed () {
+    if [ "$(uname | tr '[:upper:]' '[:lower:]' | sed -E 's/(darwin|freebsd)/HERE/')" = "HERE" ] ; then
+      sed -Ee $1
+    else
+      sed -re $1
+    fi
+}
+
 loop_versions
 
 echo ${VERSIONS[@]} \
@@ -53,7 +61,7 @@ echo ${VERSIONS[@]} \
     | grep '.tar.gz' \
     | grep '\(linux\|darwin\|freebsd\)' \
     | grep '\-\(amd64\|386\|armv6l\|armv7l\)\.' \
-    | sed -e 's/^go\([^.]*\).\([^.]*\).\([^.]*\).*/\1.\2.\3/' \
-    | sed -e 's/.\(linux\|darwin\|freebsd\|src\).*$//' \
+    | mysed 's/^go([^.]*).([^.]*).([^.]*).*/\1.\2.\3/' \
+    | mysed 's/.(linux|darwin|freebsd|src).*$//' \
     | uniq \
     | tr '\n' ' '
