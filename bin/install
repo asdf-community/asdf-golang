@@ -52,7 +52,7 @@ install_golang () {
     local arch=$(get_arch)
     local tempdir=$(my_mktemp $platform)
 
-    curl "https://storage.googleapis.com/golang/go${version}.${platform}-${arch}.tar.gz" -o "${tempdir}/archive.tar.gz"
+    curl "https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz" -o "${tempdir}/archive.tar.gz"
 
     tar -C "$install_path" -xzf "${tempdir}/archive.tar.gz"
 
