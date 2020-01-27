@@ -29,7 +29,7 @@ Feel free to create an issue or pull request if you find a bug.
 ## Issues
 
 * Assumes Linux, FreeBSD, or Mac
-* Assumes x86_64, i386, i686, armv6l, armv7l or arm64
+* Assumes x86_64, i386, i686, armv6l, armv7l, arm64 and ppc64le
 
 ## License
 MIT License
