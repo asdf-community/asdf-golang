@@ -1,8 +1,16 @@
 language: c
-script: asdf plugin-test golang .
+script: asdf plugin test golang . --asdf-plugin-gitref $TRAVIS_BRANCH go version
 before_script:
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y bsdmainutils; fi
   - git clone https://github.com/asdf-vm/asdf.git
   - . asdf/asdf.sh
-os:
-  - linux
-  - osx
+matrix:
+  include:
+   - os: linux
+     arch: amd64
+   - os: linux
+     arch: ppc64le
+   - os: linux
+     arch: arm64     
+   - os: osx
+     arch: amd64
