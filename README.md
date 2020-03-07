@@ -22,6 +22,18 @@ Check the [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how
 
 After using `go get` to install a package you need to run `asdf reshim golang` to get any new shims.
 
+
+### Default `go get` packages
+
+asdf-golang can automatically install a default set of packages with `go get -u $PACKAGE` right after installing a new Go version.
+To enable this feature, provide a \$HOME/.default-golang-pkgs file that lists one package per line, for example:
+
+```
+// allows comments
+github.com/Dreamacro/clash
+github.com/jesseduffield/lazygit
+```
+
 ## Contributing
 
 Feel free to create an issue or pull request if you find a bug.
