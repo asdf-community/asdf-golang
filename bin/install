@@ -2,7 +2,7 @@
 set -eu
 [ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
 
-BASE_URL="${BASE_URL:-https://storage.googleapis.com/golang}"
+BASE_URL="${BASE_URL:-https://dl.google.com/go}"
 BASE_URL="${BASE_URL%/}"
 
 get_platform () {
