@@ -2,9 +2,6 @@
 set -eu
 [ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
 
-BASE_URL="${BASE_URL:-https://dl.google.com/go}"
-BASE_URL="${BASE_URL%/}"
-
 get_platform () {
     local platform="$(uname | tr '[:upper:]' '[:lower:]')"
 
@@ -57,7 +54,7 @@ install_golang () {
     local arch=$(get_arch)
     local tempdir=$(my_mktemp $platform)
 
-    curl "$BASE_URL/go${version}.${platform}-${arch}.tar.gz" -o "${tempdir}/archive.tar.gz"
+    curl "https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz" -o "${tempdir}/archive.tar.gz"
 
     tar -C "$install_path" -xzf "${tempdir}/archive.tar.gz"
 
