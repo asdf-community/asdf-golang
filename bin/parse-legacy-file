@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+get_legacy_version() {
+  current_file="$1"
+  basename=$(basename -- "$current_file")
+
+  if [ "$basename" == "go.mod" ]; then
+    GOLANG_VERSION=$(grep 'go\s*\d' "$current_file" |
+                       sed -e 's/.*heroku goVersion //' \
+                           -e 's/[[:space:]]//' \
+                           -e 's/go\(.*\)/\1/' |
+                       head -1
+      )
+  else
+    GOLANG_VERSION=$(cat "$current_file")
+  fi
+
+  echo "$GOLANG_VERSION"
+}
+
+get_legacy_version "$1"
