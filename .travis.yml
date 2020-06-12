@@ -11,6 +11,6 @@ matrix:
    - os: linux
      arch: ppc64le
    - os: linux
-     arch: arm64     
+     arch: arm64
    - os: osx
      arch: amd64
