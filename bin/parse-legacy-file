@@ -15,7 +15,7 @@ get_legacy_version() {
     GOLANG_VERSION=$(cat "$current_file")
   fi
 
-  echo "$GOLANG_VERSION"
+  echo $(asdf list golang | grep $GOLANG_VERSION | sort -V | tail -1)
 }
 
 get_legacy_version "$1"
