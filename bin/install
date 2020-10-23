@@ -75,7 +75,7 @@ install_default_go_pkgs() {
 
     if [ -z $name ]; then continue ; fi
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... "
-    PATH="$ASDF_INSTALL_PATH/bin:$PATH" go get -u $name > /dev/null && rc=$? || rc=$?
+    PATH="$ASDF_INSTALL_PATH/go/bin:$PATH" go get -u $name > /dev/null && rc=$? || rc=$?
     if [[ $rc -eq 0 ]]; then
       needs_reshim=1
       echo -e "\033[32mSUCCESS\033[39m"
