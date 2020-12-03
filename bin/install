@@ -25,7 +25,7 @@ get_arch () {
         x86_64|amd64) arch="amd64"; ;;
         i686|i386) arch="386"; ;;
         armv6l|armv7l) arch="armv6l"; ;;
-        aarch64) arch="arm64"; ;;
+        aarch64|arm64) arch="arm64"; ;;
         ppc64le) arch="ppc64le"; ;;
         *)
             echo "Arch '$(uname -m)' not supported!" >&2
