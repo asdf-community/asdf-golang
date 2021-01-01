@@ -2,91 +2,65 @@
 set -eu
 [ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
 
-get_platform () {
-    local platform="$(uname | tr '[:upper:]' '[:lower:]')"
-
-    case "$platform" in
-        linux|darwin|freebsd)
-            echo "Platform '${platform}' supported!" >&2
-            ;;
-        *)
-            echo "Platform '${platform}' not supported!" >&2
-            exit 1
-            ;;
-    esac
-
-    echo -n $platform
-}
-
-get_arch () {
-    local arch=""
-
-    case "$(uname -m)" in
-        x86_64|amd64) arch="amd64"; ;;
-        i686|i386) arch="386"; ;;
-        armv6l|armv7l) arch="armv6l"; ;;
-        aarch64|arm64) arch="arm64"; ;;
-        ppc64le) arch="ppc64le"; ;;
-        *)
-            echo "Arch '$(uname -m)' not supported!" >&2
-            exit 1
-            ;;
-    esac
-
-    echo -n $arch
-}
-
 my_mktemp () {
     local tempdir=""
-    if [ "linux" = "$1" ] ; then
+    local platform=""
+    platform="$(uname | tr '[:upper:]' '[:lower:]')"
+
+    if [ "linux" = "$platform" ] ; then
         tempdir=$(mktemp -d asdf-golang.XXXX)
     else
         tempdir=$(mktemp -dt asdf-golang.XXXX)
     fi
-    echo -n $tempdir
+
+    echo -n "$tempdir"
 }
 
 install_golang () {
-    local install_type=$1
-    local version=$2
-    local install_path=$3
-    local platform=$(get_platform)
-    local arch=$(get_arch)
-    local tempdir=$(my_mktemp $platform)
+    local version="$1"
+    local download_path="$2"
+    local install_path="$3"
 
-    curl "https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz" -o "${tempdir}/archive.tar.gz"
+    if [ -z "$download_path" ] ; then
+        download_path="$(my_mktemp)"
+        env - ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$(dirname "${BASH_SOURCE[0]}")/download"
+    fi
 
-    tar -C "$install_path" -xzf "${tempdir}/archive.tar.gz"
-
-    rm -rf "${tempdir}"
+    tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
 }
 
 install_default_go_pkgs() {
+  local go_path="$1/go/bin"
+  local asdf_bin="$1/bin/asdf"
   local default_go_pkgs="${HOME}/.default-golang-pkgs"
 
-  if [ ! -f $default_go_pkgs ]; then return; fi
+  if [ ! -f "$default_go_pkgs" ]; then return; fi
 
   needs_reshim=0
 
-  cat "$default_go_pkgs" | while read -r line; do
+  while read -r line; do
     name=$(echo "$line" | \
       sed 's|\(.*\) //.*$|\1|' | \
       sed -E 's|^[[:space:]]*//.*||') # the first sed is for comments after package names, the second for full line comments
 
-    if [ -z $name ]; then continue ; fi
+    # Skip empty lines
+    if [ -z "$name" ]; then continue ; fi
+
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... "
-    PATH="$ASDF_INSTALL_PATH/go/bin:$PATH" go get -u $name > /dev/null && rc=$? || rc=$?
+    env - PATH="$go_path:$PATH" go get -u "$name" > /dev/null && rc=$? || rc=$?
+
     if [[ $rc -eq 0 ]]; then
       needs_reshim=1
       echo -e "\033[32mSUCCESS\033[39m"
     else
       echo -e "\033[31mFAIL\033[39m"
     fi
-  done
+  done < "$default_go_pkgs"
+
   if [[ $needs_reshim -eq 1 ]]; then
-    "$ASDF_INSTALL_PATH/bin/asdf" reshim golang
+    "$asdf_bin" reshim golang
   fi
 }
 
-install_golang $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
-install_default_go_pkgs
+install_golang "$ASDF_INSTALL_VERSION" "$ASDF_DOWNLOAD_PATH" "$ASDF_INSTALL_PATH"
+install_default_go_pkgs "$ASDF_INSTALL_PATH"
