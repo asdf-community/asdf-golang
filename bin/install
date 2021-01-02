@@ -31,12 +31,9 @@ install_golang () {
 
 install_default_go_pkgs() {
   local go_path="$1/go/bin"
-  local asdf_bin="$1/bin/asdf"
   local default_go_pkgs="${HOME}/.default-golang-pkgs"
 
   if [ ! -f "$default_go_pkgs" ]; then return; fi
-
-  needs_reshim=0
 
   while read -r line; do
     name=$(echo "$line" | \
@@ -50,16 +47,11 @@ install_default_go_pkgs() {
     env - PATH="$go_path:$PATH" go get -u "$name" > /dev/null && rc=$? || rc=$?
 
     if [[ $rc -eq 0 ]]; then
-      needs_reshim=1
       echo -e "\033[32mSUCCESS\033[39m"
     else
       echo -e "\033[31mFAIL\033[39m"
     fi
   done < "$default_go_pkgs"
-
-  if [[ $needs_reshim -eq 1 ]]; then
-    "$asdf_bin" reshim golang
-  fi
 }
 
 install_golang "$ASDF_INSTALL_VERSION" "$ASDF_DOWNLOAD_PATH" "$ASDF_INSTALL_PATH"
