@@ -38,6 +38,26 @@ get_arch () {
     echo -n $arch
 }
 
+check_shasum() {
+    local archive_file_name=$1
+    local authentic_checksum_file=$2
+    local authentic_checksum=""
+
+    authentic_checksum=$(<"$authentic_checksum_file")
+
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum \
+            -c <<<"$authentic_checksum $archive_file_name"
+    elif command -v shasum >/dev/null 2>&1; then
+        shasum \
+        -a 256 \
+        -c <<<"$authentic_checksum $archive_file_name"
+    else
+        echo "sha256sum or shasum is not available for use" >&2
+        return 1
+    fi
+}
+
 download_golang () {
     local version=$1
     local download_path=$2
@@ -48,6 +68,15 @@ download_golang () {
     arch=$(get_arch)
 
     curl "https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz" -o "${download_path}/archive.tar.gz"
+    curl "https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz.sha256" -o "${download_path}/archive.tar.gz.sha256"
+
+    echo 'verifying checksum'
+    if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
+        echo "\033[31mAuthenticity of package archive can not be assured. Exiting.\033[39m" >&2
+        exit 1
+    else
+      echo -e "\033[32mcheckum verified\033[39m" >&2
+    fi
 }
 
 download_golang "$ASDF_INSTALL_VERSION" "$ASDF_DOWNLOAD_PATH"
