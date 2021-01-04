@@ -3,13 +3,14 @@ set -eu
 [ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
 
 get_platform () {
+    local silent=${1:-}
     local platform=""
 
     platform="$(uname | tr '[:upper:]' '[:lower:]')"
 
     case "$platform" in
         linux|darwin|freebsd)
-            msg "Platform '${platform}' supported!"
+            [ -z "$silent" ] && msg "Platform '${platform}' supported!"
             ;;
         *)
             fail "Platform '${platform}' not supported!"

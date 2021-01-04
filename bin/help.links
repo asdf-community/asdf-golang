@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eu
+[ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
+
+PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
+
+# shellcheck source=/dev/null
+source "$PLUGIN_DIR/lib/helpers.sh"
+
+cat <<-EOM
+	Plugin: https://github.com/kennyp/asdf-golang
+	Go: https://golang.org/ 
+	GNU Core Utils: http://www.gnu.org/software/coreutils/coreutils.html 
+	curl: https://curl.haxx.se 
+EOM

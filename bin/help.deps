@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eu
+[ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
+
+PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
+
+# shellcheck source=/dev/null
+source "$PLUGIN_DIR/lib/helpers.sh"
+
+if [ "$(get_platform silent)" = "darwin" ]; then
+    echo "coreutils"
+else
+    echo "coreutils"
+    echo "curl"
+fi
