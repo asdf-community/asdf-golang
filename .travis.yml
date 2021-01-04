@@ -1,7 +1,7 @@
-language: c
+language: bash
 script: 
   - asdf plugin test golang $TRAVIS_BUILD_DIR --asdf-plugin-gitref $TRAVIS_COMMIT go version
-  - bash -c "shopt -s globstar nullglob; shellcheck $TRAVIS_BUILD_DIR/bin/*"
+  - shellcheck "$TRAVIS_BUILD_DIR/bin"/*
 before_script:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y bsdmainutils; fi
   - git clone https://github.com/asdf-vm/asdf.git
