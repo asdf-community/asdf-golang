@@ -4,7 +4,7 @@ set -eu
 
 get_platform () {
     local platform=""
-    
+
     platform="$(uname | tr '[:upper:]' '[:lower:]')"
 
     case "$platform" in

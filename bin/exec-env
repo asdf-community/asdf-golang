@@ -4,7 +4,7 @@ if [ "${ASDF_INSTALL_VERSION}" != 'system' ] ; then
 	if [ "$GOROOT" = "" ] ; then
 	    export GOROOT=$ASDF_INSTALL_PATH/go
 	fi
-	
+
 	if [ "$GOPATH" = "" ] ; then
 	    export GOPATH=$ASDF_INSTALL_PATH/packages
 	fi
