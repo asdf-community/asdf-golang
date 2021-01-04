@@ -34,7 +34,7 @@ After using `go get` to install a package you need to run `asdf reshim golang` t
 asdf-golang can automatically install a default set of packages with `go get -u $PACKAGE` right after installing a new Go version.
 To enable this feature, provide a \$HOME/.default-golang-pkgs file that lists one package per line, for example:
 
-```shell
+```bash
 // allows comments
 github.com/Dreamacro/clash
 github.com/jesseduffield/lazygit
