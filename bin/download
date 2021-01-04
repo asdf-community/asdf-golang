@@ -2,23 +2,10 @@
 set -eu
 [ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
 
-get_platform () {
-    local platform=""
+PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 
-    platform="$(uname | tr '[:upper:]' '[:lower:]')"
-
-    case "$platform" in
-        linux|darwin|freebsd)
-            echo "Platform '${platform}' supported!" >&2
-            ;;
-        *)
-            echo "Platform '${platform}' not supported!" >&2
-            exit 1
-            ;;
-    esac
-
-    echo -n "$platform"
-}
+# shellcheck source=/dev/null
+source "$PLUGIN_DIR/lib/helpers.sh"
 
 get_arch () {
     local arch=""
@@ -30,8 +17,7 @@ get_arch () {
         aarch64|arm64) arch="arm64"; ;;
         ppc64le) arch="ppc64le"; ;;
         *)
-            echo "Arch '$(uname -m)' not supported!" >&2
-            exit 1
+            fail "Arch '$(uname -m)' not supported!"
             ;;
     esac
 
@@ -53,8 +39,7 @@ check_shasum() {
         -a 256 \
         -c <<<"$authentic_checksum $archive_file_name"
     else
-        echo "sha256sum or shasum is not available for use" >&2
-        return 1
+        fail "sha256sum or shasum is not available for use"
     fi
 }
 
@@ -72,10 +57,9 @@ download_golang () {
 
     echo 'verifying checksum'
     if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
-        echo "\033[31mAuthenticity of package archive can not be assured. Exiting.\033[39m" >&2
-        exit 1
+        fail "Authenticity of package archive can not be assured. Exiting."
     else
-      echo -e "\033[32mcheckum verified\033[39m" >&2
+      msg "checksum verified"
     fi
 }
 

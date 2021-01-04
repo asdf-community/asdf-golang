@@ -2,10 +2,15 @@
 set -eu
 [ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
 
+PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
+
+# shellcheck source=/dev/null
+source "$PLUGIN_DIR/lib/helpers.sh"
+
 my_mktemp () {
     local tempdir=""
     local platform=""
-    platform="$(uname | tr '[:upper:]' '[:lower:]')"
+    platform="$(get_platform)"
 
     if [ "linux" = "$platform" ] ; then
         tempdir=$(mktemp -d asdf-golang.XXXX)
@@ -23,7 +28,7 @@ install_golang () {
 
     if [ -z "$download_path" ] ; then
         download_path="$(my_mktemp)"
-        ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$(dirname "${BASH_SOURCE[0]}")/download"
+        ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$PLUGIN_DIR/bin/download"
     fi
 
     tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
@@ -50,9 +55,9 @@ install_default_go_pkgs() {
         go get -u "$name" > /dev/null && rc=$? || rc=$?
 
     if [[ $rc -eq 0 ]]; then
-      echo -e "\033[32mSUCCESS\033[39m" >&2
+      msg "SUCCESS"
     else
-      echo -e "\033[31mFAIL\033[39m" >&2
+      err "FAIL"
     fi
   done < "$default_go_pkgs"
 }
