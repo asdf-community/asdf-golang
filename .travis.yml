@@ -1,13 +1,13 @@
 language: bash
 script: 
   - asdf plugin test golang $TRAVIS_BUILD_DIR --asdf-plugin-gitref $TRAVIS_COMMIT go version
-  - shellcheck "$TRAVIS_BUILD_DIR/bin"/*
+  - "$TRAVIS_BUILD_DIR/shellcheck" "$TRAVIS_BUILD_DIR/bin"/*
 before_script:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y bsdmainutils; fi
   - git clone https://github.com/asdf-vm/asdf.git
   - . asdf/asdf.sh
   - wget -qO- "https://github.com/koalaman/shellcheck/releases/download/stable/shellcheck-stable.linux.x86_64.tar.xz" | tar -xJv
-  - cp "shellcheck-stable/shellcheck" /usr/bin
+  - cp "shellcheck-stable/shellcheck" "$TRAVIS_BUILD_DIR/shellcheck"
 matrix:
   include:
    - os: linux
