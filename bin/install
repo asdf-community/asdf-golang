@@ -23,7 +23,7 @@ install_golang () {
 
     if [ -z "$download_path" ] ; then
         download_path="$(my_mktemp)"
-        env - ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$(dirname "${BASH_SOURCE[0]}")/download"
+        ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$(dirname "${BASH_SOURCE[0]}")/download"
     fi
 
     tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
@@ -44,8 +44,10 @@ install_default_go_pkgs() {
     if [ -z "$name" ]; then continue ; fi
 
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... " >&2
-    env - GOROOT="$ASDF_INSTALL_PATH/go" GOPATH="$ASDF_INSTALL_PATH/packages" \
-        PATH="$go_path:$PATH" go get -u "$name" > /dev/null && rc=$? || rc=$?
+    GOROOT="$ASDF_INSTALL_PATH/go" \
+        GOPATH="$ASDF_INSTALL_PATH/packages" \
+        PATH="$go_path:$PATH" \
+        go get -u "$name" > /dev/null && rc=$? || rc=$?
 
     if [[ $rc -eq 0 ]]; then
       echo -e "\033[32mSUCCESS\033[39m" >&2

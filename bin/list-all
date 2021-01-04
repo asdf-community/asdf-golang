@@ -11,10 +11,9 @@ TRUNCATED='true'
 # Shamelessly stolen from: https://stackoverflow.com/questions/893585/how-to-parse-xml-in-bash {
 function read_dom() {
     local IFS=\>
-    read -d \< ENTITY CONTENT
+    read -rd \< ENTITY CONTENT
     local RET=$?
     TAG_NAME=${ENTITY%% *}
-    ATTRIBUTES=${ENTITY#* }
     return $RET
 }
 
@@ -31,11 +30,11 @@ function parse_dom() {
 }
 
 function get_versions() {
-  XML=$(curl --silent ${BASE_URL}${NEXT_MARKER})
+  XML=$(curl --silent "${BASE_URL}${NEXT_MARKER}")
 
   while read_dom; do
       parse_dom
-  done <<< $XML
+  done <<< "$XML"
 }
 # }
 
@@ -48,15 +47,15 @@ function loop_versions() {
 
 mysed () {
     if [ "$(uname | tr '[:upper:]' '[:lower:]' | sed -E 's/(darwin|freebsd)/HERE/')" = "HERE" ] ; then
-      sed -Ee $1
+      sed -Ee "$1"
     else
-      sed -re $1
+      sed -re "$1"
     fi
 }
 
 loop_versions
 
-echo ${VERSIONS[@]} \
+echo "${VERSIONS[@]}" \
     | tr ' ' '\n' \
     | grep '.tar.gz' \
     | grep '\(linux\|darwin\|freebsd\)' \
