@@ -40,6 +40,18 @@ github.com/Dreamacro/clash
 github.com/jesseduffield/lazygit
 ```
 
+## Version selection
+
+When using `.tool-versions` or `.go-version`, the exact version specified in the
+file will be selected.
+
+When using `go.mod`, the highest compatible version that is currently installed
+will be selected. As per the [Go modules
+reference](https://golang.org/ref/mod#go-mod-file-go), that is the highest minor
+version with a matching major version. For example, a `go 1.14` directive in a
+`go.mod` file will result in the highest installed `1.minor.patch` being
+selected, not necessarily `1.14.patch`.
+
 ## Contributing
 
 Feel free to create an issue or pull request if you find a bug.

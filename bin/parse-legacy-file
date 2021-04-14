@@ -6,9 +6,10 @@ get_legacy_version() {
 
   if [ "$basename" == "go.mod" ]; then
     GOLANG_VERSION=$(grep 'go\s*[0-9]' "$current_file" |
-                       sed -e 's/.*heroku goVersion //' \
+                       sed -E \
+                           -e 's/.*heroku goVersion //' \
                            -e 's/[[:space:]]//' \
-                           -e 's/go\(.*\)/\1/' |
+                           -e 's/go([0-9]+).*/\1/' |
                        head -1
       )
   else
