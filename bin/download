@@ -51,9 +51,15 @@ download_golang () {
 
     platform=$(get_platform)
     arch=$(get_arch)
+    download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
 
-    curl "https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz" -o "${download_path}/archive.tar.gz"
-    curl "https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz.sha256" -o "${download_path}/archive.tar.gz.sha256"
+    http_code=$(curl -I -w %{http_code} -s -o /dev/null $download_url)
+    if [ $http_code -eq 404 ] || [ $http_code -eq 403 ]; then
+        fail "URL: ${download_url} returned status ${http_code}"
+    fi
+
+    curl $download_url -o "${download_path}/archive.tar.gz"
+    curl "${download_url}.sha256" -o "${download_path}/archive.tar.gz.sha256"
 
     echo 'verifying checksum'
     if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
