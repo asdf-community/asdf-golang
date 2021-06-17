@@ -25,6 +25,13 @@ asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
 
 Check the [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of go.
 
+## `GOROOT`
+
+To set `GOROOT` in your shell's initialization add the following:
+
+**zsh shell**  
+`. ~/.asdf/plugins/golang/set-env.zsh`  
+
 ## When using `go get`
 
 After using `go get` to install a package you need to run `asdf reshim golang` to get any new shims.
