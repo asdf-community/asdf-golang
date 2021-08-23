@@ -28,7 +28,7 @@ install_golang () {
 
 install_default_go_pkgs() {
   local go_path="$1/go/bin"
-  local default_go_pkgs="${HOME}/.default-golang-pkgs"
+  local default_go_pkgs="${ASDF_GOLANG_DEFAULT_PACKAGES_FILE:-${HOME}/.default-golang-pkgs}"
 
   if [ ! -f "$default_go_pkgs" ]; then return; fi
 
