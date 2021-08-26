@@ -40,6 +40,8 @@ github.com/Dreamacro/clash
 github.com/jesseduffield/lazygit
 ```
 
+You can specify a non-default location of this file by setting a `ASDF_GOLANG_DEFAULT_PACKAGES_FILE` variable.
+
 ## Version selection
 
 When using `.tool-versions` or `.go-version`, the exact version specified in the
