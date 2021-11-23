@@ -20,7 +20,7 @@ install_golang () {
     fi
 
     tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
-    
+
     if [ "1" = "$created_tmp" ]; then
         rm -r "$download_path"
     fi
@@ -29,8 +29,10 @@ install_golang () {
 install_default_go_pkgs() {
   local go_path="$1/go/bin"
   local default_go_pkgs="${ASDF_GOLANG_DEFAULT_PACKAGES_FILE:-${HOME}/.default-golang-pkgs}"
+  local go_version=`${2} | cut -d. -f2`
 
   if [ ! -f "$default_go_pkgs" ]; then return; fi
+
 
   while read -r line; do
     name=$(echo "$line" | \
@@ -41,10 +43,19 @@ install_default_go_pkgs() {
     if [ -z "$name" ]; then continue ; fi
 
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... " >&2
-    GOROOT="$ASDF_INSTALL_PATH/go" \
-        GOPATH="$ASDF_INSTALL_PATH/packages" \
-        PATH="$go_path:$PATH" \
-        go get -u "$name" > /dev/null && rc=$? || rc=$?
+
+    # if using go > 1.16 then use go install as the preferred donwload path
+    if [ $go_version -ge 16 ]; then
+        GOROOT="$ASDF_INSTALL_PATH/go" \
+            GOPATH="$ASDF_INSTALL_PATH/packages" \
+            PATH="$go_path:$PATH" \
+            go install "$name" > /dev/null && rc=$? || rc=$?
+    else
+        GOROOT="$ASDF_INSTALL_PATH/go" \
+            GOPATH="$ASDF_INSTALL_PATH/packages" \
+            PATH="$go_path:$PATH" \
+            go get -u "$name" > /dev/null && rc=$? || rc=$?
+    fi
 
     if [[ $rc -eq 0 ]]; then
       msg "SUCCESS"
@@ -55,4 +66,4 @@ install_default_go_pkgs() {
 }
 
 install_golang "$ASDF_INSTALL_VERSION" "${ASDF_DOWNLOAD_PATH:-}" "$ASDF_INSTALL_PATH"
-install_default_go_pkgs "$ASDF_INSTALL_PATH"
+install_default_go_pkgs "$ASDF_INSTALL_PATH" "$ASDF_INSTALL_VERSION"
