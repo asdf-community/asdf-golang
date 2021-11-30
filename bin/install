@@ -29,7 +29,10 @@ install_golang () {
 install_default_go_pkgs() {
   local go_path="$1/go/bin"
   local default_go_pkgs="${ASDF_GOLANG_DEFAULT_PACKAGES_FILE:-${HOME}/.default-golang-pkgs}"
-  local go_version=`${2} | cut -d. -f2`
+  go_minor_version=$(${2} | cut -d. -f2)
+  go_major_version=$(${2} | cut -d. -f1)
+  local go_major_version = go_major_version
+  local go_minor_version = go_minor_version
 
   if [ ! -f "$default_go_pkgs" ]; then return; fi
 
@@ -45,7 +48,7 @@ install_default_go_pkgs() {
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... " >&2
 
     # if using go > 1.16 then use go install as the preferred donwload path
-    if [ $go_version -ge 16 ]; then
+    if [ "$go_major_version" -ge 2 ] || [ "$go_minor_version" -ge 16 ]; then
         GOROOT="$ASDF_INSTALL_PATH/go" \
             GOPATH="$ASDF_INSTALL_PATH/packages" \
             PATH="$go_path:$PATH" \
