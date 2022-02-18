@@ -5,18 +5,15 @@ get_legacy_version() {
   basename=$(basename -- "$current_file")
 
   if [ "$basename" == "go.mod" ]; then
-    GOLANG_VERSION=$(grep 'go\s*[0-9]' "$current_file" |
-                       sed -E \
-                           -e 's/.*heroku goVersion //' \
-                           -e 's/[[:space:]]//' \
-                           -e 's/go([0-9]+).*/\1/' |
-                       head -1
-      )
+    grep 'go\s*[0-9]' "$current_file" |
+      sed -E \
+          -e 's/.*heroku goVersion //' \
+          -e 's/[[:space:]]//' \
+          -e 's/go//' |
+      head -1
   else
-    GOLANG_VERSION=$(cat "$current_file")
+    cat "$current_file"
   fi
-
-  asdf list golang | sed -e 's/ //g' | grep "^$GOLANG_VERSION" | sort -V | tail -1
 }
 
 get_legacy_version "$1"
