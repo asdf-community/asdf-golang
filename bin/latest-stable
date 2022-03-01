@@ -7,7 +7,7 @@ PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 # shellcheck source=/dev/null
 source "$PLUGIN_DIR/lib/helpers.sh"
 
-command eval "VERSIONS=($("$PLUGIN_DIR"/bin/list-all | tr ' ' '\n' | grep -ivE "(^Available versions:|-src|-dev|-latest|-stm|[-\\.]rc|-alpha|-beta|[-\\.]pre|-next|(a|b|c)[0-9]+|snapshot|master)" | sed 's/^[[:space:]]\+//'))"
+command eval "VERSIONS=($("$PLUGIN_DIR"/bin/list-all | tr ' ' '\n' | grep -ivE "(^Available versions:|-src|-dev|-latest|-stm|[-\\.]rc|-alpha|-beta|[-\\.]pre|-next|(a|b|c)[0-9]+|snapshot|master)" | grep "^$1" | sed 's/^[[:space:]]\+//'))"
 
 platform=$(get_platform true)
 arch=$(get_arch)
