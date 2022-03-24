@@ -8,4 +8,8 @@ if [ "${ASDF_INSTALL_VERSION}" != 'system' ] ; then
 	if [[ "unset" == "${GOPATH:-unset}" ]] ; then
 	    export GOPATH=$ASDF_INSTALL_PATH/packages
 	fi
+
+	if [[ "unset" == "${GOBIN:-unset}" ]] ; then
+	    export GOBIN=$ASDF_INSTALL_PATH/bin
+	fi
 fi
