@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
 if [ "${ASDF_INSTALL_VERSION}" = 'system' ] ; then
-	unset -v GOROOT GOPATH
+	[ "${ASDF_GOLANG_DISABLE_GOROOT-}" = '1' ] || unset -v GOROOT
+	[ "${ASDF_GOLANG_DISABLE_GOPATH-}" = '1' ] || unset -v GOPATH
 else
-	export GOROOT=$ASDF_INSTALL_PATH/go
-	export GOPATH=$ASDF_INSTALL_PATH/packages
+	[ "${ASDF_GOLANG_DISABLE_GOROOT-}" = '1' ] ||
+	    export GOROOT=$ASDF_INSTALL_PATH/go
+	[ "${ASDF_GOLANG_DISABLE_GOPATH-}" = '1' ] ||
+	    export GOPATH=$ASDF_INSTALL_PATH/packages
 fi

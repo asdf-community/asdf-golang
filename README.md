@@ -86,6 +86,14 @@ checksum verified
 By default we try to verify the checksum of each install but ocassionally [that's not possible](https://github.com/kennyp/asdf-golang/issues/91).
 If you need to skip the checksum for some reason just set `ASDF_GOLANG_SKIP_CHECKSUM`.
 
+## `GOROOT` and `GOPATH` Overrides
+
+By default, `$GOROOT` and `$GOPATH` are set to the selected version's
+`.../go` and `.../packages` dirs, and unset if the selected version is
+`system`. Set the `$ASDF_GOLANG_DISABLE_GOROOT` and/or
+`$ASDF_GOLANG_DISABLE_GOPATH` environment variables to `1` to disable
+this behavior for the respective variables.
+
 ## Contributing
 
 Feel free to create an issue or pull request if you find a bug.
