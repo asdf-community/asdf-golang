@@ -16,11 +16,11 @@ check_shasum() {
 
     if command -v sha256sum >/dev/null 2>&1; then
         sha256sum \
-            -c <<<"$authentic_checksum  $archive_file_name"
+            -c <(echo "$authentic_checksum  $archive_file_name")
     elif command -v shasum >/dev/null 2>&1; then
         shasum \
         -a 256 \
-        -c <<<"$authentic_checksum  $archive_file_name"
+        -c <(echo "$authentic_checksum  $archive_file_name")
     else
         fail "sha256sum or shasum is not available for use"
     fi
