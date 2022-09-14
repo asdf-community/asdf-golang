@@ -15,7 +15,7 @@ version=""
 
 for (( i=${#VERSIONS[@]}-1; i>=0; i-- )); do
     version="${VERSIONS[i]}"
-    download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
+    download_url="https://go.dev/dl/go${version}.${platform}-${arch}.tar.gz"
     http_code=$(curl -I -w '%{http_code}' -s -o /dev/null "$download_url")
     if [ "$http_code" -ne 404 ] && [ "$http_code" -ne 403 ]; then
         break
