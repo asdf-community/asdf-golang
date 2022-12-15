@@ -31,21 +31,25 @@ download_golang () {
     local download_path=$2
     local platform=""
     local arch=""
+    local filetype="tar.gz"
 
     platform=$(get_platform)
+    if [ "$platform" == "windows" ]; then
+        filetype="zip"
+    fi
     arch=$(get_arch)
-    download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
+    download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.${filetype}"
 
     http_code=$(curl -I -w '%{http_code}' -s -o /dev/null "$download_url")
     if [ "$http_code" -eq 404 ] || [ "$http_code" -eq 403 ]; then
         fail "URL: ${download_url} returned status ${http_code}"
     fi
 
-    curl "$download_url" -o "${download_path}/archive.tar.gz"
-    curl "${download_url}.sha256" -o "${download_path}/archive.tar.gz.sha256"
+    curl "$download_url" -o "${download_path}/archive.${filetype}"
+    curl "${download_url}.sha256" -o "${download_path}/archive.${filetype}.sha256"
 
     echo 'verifying checksum'
-    if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
+    if ! check_shasum "${download_path}/archive.${filetype}" "${download_path}/archive.${filetype}.sha256"; then
         fail "Authenticity of package archive can not be assured. Exiting."
     else
       msg "checksum verified"

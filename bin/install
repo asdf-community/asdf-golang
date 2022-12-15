@@ -18,8 +18,12 @@ install_golang () {
         created_tmp="1"
         ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$PLUGIN_DIR/bin/download"
     fi
-
-    tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
+   
+    if [ "$(get_platform)" == "windows" ]; then
+        unzip -d "$install_path" "${download_path}/archive.zip"
+    else
+        tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
+    fi
 
     if [ "1" = "$created_tmp" ]; then
         rm -r "$download_path"

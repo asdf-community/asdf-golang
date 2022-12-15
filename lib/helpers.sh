@@ -9,6 +9,10 @@ get_platform () {
     platform="$(uname | tr '[:upper:]' '[:lower:]')"
 
     case "$platform" in
+        msys_nt*)
+	    platform="windows"
+            [ -z "$silent" ] && msg "Platform '${platform}' supported!"
+            ;;
         linux|darwin|freebsd)
             [ -z "$silent" ] && msg "Platform '${platform}' supported!"
             ;;
