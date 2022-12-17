@@ -8,12 +8,12 @@ golang plugin for [asdf version manager](https://github.com/asdf-vm/asdf)
 
 ### MacOS
 
-- [GNU Core Utils](http://www.gnu.org/software/coreutils/coreutils.html) - `brew install coreutils`
+* [GNU Core Utils](http://www.gnu.org/software/coreutils/coreutils.html) - `brew install coreutils`
 
 ### Linux (Debian)
 
-- [GNU Core Utils](http://www.gnu.org/software/coreutils/coreutils.html) - `apt install coreutils`
-- [curl](https://curl.haxx.se) - `apt install curl`
+* [GNU Core Utils](http://www.gnu.org/software/coreutils/coreutils.html) - `apt install coreutils`
+* [curl](https://curl.haxx.se) - `apt install curl`
 
 ## Install
 
@@ -56,20 +56,17 @@ selected, not necessarily `1.14.patch`.
 
 ## Architecture Override
 
-The `ASDF_GOLANG_OVERWRITE_ARCH` variable can be used to override the architecture
-that is used for determining which Go build to download. The primary use case is when attempting
+The `ASDF_GOLANG_OVERWRITE_ARCH` variable can be used to override the architecture 
+that is used for determining which Go build to download. The primary use case is when attempting 
 to install an older version of Go for use on an Apple M1 computer as Go was not being built for ARM at the time.
-
 #### Without ASDF_GOLANG_OVERWRITE_ARCH
-
 ```
 > asdf install golang 1.15.8
 Platform 'darwin' supported!
-URL: https://go.dev/dl/go1.15.8.darwin-arm64.tar.gz returned status 404
+URL: https://dl.google.com/go/go1.15.8.darwin-arm64.tar.gz returned status 404
 ```
 
 #### With ASDF_GOLANG_OVERWRITE_ARCH
-
 ```
 > ASDF_GOLANG_OVERWRITE_ARCH=amd64 asdf install golang 1.15.8
 Platform 'darwin' supported!
@@ -87,8 +84,8 @@ Feel free to create an issue or pull request if you find a bug.
 
 ## Issues
 
-- Assumes Linux, FreeBSD, or Mac
-- Assumes x86_64, i386, i686, armv6l, armv7l, arm64 and ppc64le
+* Assumes Linux, FreeBSD, or Mac
+* Assumes x86_64, i386, i686, armv6l, armv7l, arm64 and ppc64le
 
 ## License
 

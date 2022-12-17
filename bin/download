@@ -34,7 +34,7 @@ download_golang () {
 
     platform=$(get_platform)
     arch=$(get_arch)
-    download_url="https://go.dev/dl/go${version}.${platform}-${arch}.tar.gz"
+    download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
 
     http_code=$(curl -I -w '%{http_code}' -s -o /dev/null "$download_url")
     if [ "$http_code" -eq 404 ] || [ "$http_code" -eq 403 ]; then
