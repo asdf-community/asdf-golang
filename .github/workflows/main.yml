@@ -36,7 +36,7 @@ jobs:
         run: shellcheck bin/*
 
       - name: Install ShellSpec
-        run: curl -fsSL https://git.io/shellspec | sh -s 0.28.1 -p ./tools
+        run: curl -fsSL https://git.io/shellspec | sh -s 0.28.1 -p ./tools -y
 
       - name: Run ShellSpec
         run: ./tools/bin/shellspec
