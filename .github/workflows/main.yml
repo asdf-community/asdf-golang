@@ -26,9 +26,7 @@ jobs:
           command: go version
 
       - name: Run ShellSpec
-        run: |
-          curl -fsSL https://git.io/shellspec | sh -s 0.28.1 -p ./tools -y
-          ./tools/lib/shellspec/bin/shellspec
+        uses: ./.github/workflows/shellspec.yml
 
   lint:
     runs-on: ubuntu-latest
