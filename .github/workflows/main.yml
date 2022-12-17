@@ -38,4 +38,5 @@ jobs:
       - name: Run ShellSpec
         run: |
           curl -fsSL https://git.io/shellspec | sh -s 0.28.1 -p ./tools -y
+          find .
           ./tools/bin/shellspec
