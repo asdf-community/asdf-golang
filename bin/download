@@ -42,13 +42,18 @@ download_golang () {
     fi
 
     curl "$download_url" -o "${download_path}/archive.tar.gz"
-    curl "${download_url}.sha256" -o "${download_path}/archive.tar.gz.sha256"
 
-    echo 'verifying checksum'
-    if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
-        fail "Authenticity of package archive can not be assured. Exiting."
+    if [ "unset" = "${ASDF_GOLANG_SKIP_CHECKSUM:-unset}" ]; then
+        curl "${download_url}.sha256" -o "${download_path}/archive.tar.gz.sha256"
+
+        echo 'verifying checksum'
+        if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
+            fail "Authenticity of package archive can not be assured. Exiting."
+        else
+          msg "checksum verified"
+        fi
     else
-      msg "checksum verified"
+        err "checksum skipped"
     fi
 }
 

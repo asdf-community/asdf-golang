@@ -59,7 +59,9 @@ selected, not necessarily `1.14.patch`.
 The `ASDF_GOLANG_OVERWRITE_ARCH` variable can be used to override the architecture 
 that is used for determining which Go build to download. The primary use case is when attempting 
 to install an older version of Go for use on an Apple M1 computer as Go was not being built for ARM at the time.
+
 #### Without ASDF_GOLANG_OVERWRITE_ARCH
+
 ```
 > asdf install golang 1.15.8
 Platform 'darwin' supported!
@@ -67,6 +69,7 @@ URL: https://dl.google.com/go/go1.15.8.darwin-arm64.tar.gz returned status 404
 ```
 
 #### With ASDF_GOLANG_OVERWRITE_ARCH
+
 ```
 > ASDF_GOLANG_OVERWRITE_ARCH=amd64 asdf install golang 1.15.8
 Platform 'darwin' supported!
@@ -77,6 +80,11 @@ verifying checksum
 /Users/<home>/.asdf/downloads/golang/1.15.8/archive.tar.gz: OK
 checksum verified
 ```
+
+## Skipping Checksums
+
+By default we try to verify the checksum of each install but ocassionally [that's not possible](https://github.com/kennyp/asdf-golang/issues/91).
+If you need to skip the checksum for some reason just set `ASDF_GOLANG_SKIP_CHECKSUM`.
 
 ## Contributing
 
