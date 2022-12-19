@@ -16,19 +16,10 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          - windows-latest
 
     runs-on: ${{ matrix.os }}
 
-    defaults:
-      run:
-        shell: msys2 {0}
-
     steps:
-      - if: runner.os == 'Windows'
-        name: "Install mingw deps"
-        uses: msys2/setup-msys2@v2
-
       - name: Test plugin
         uses: asdf-vm/actions/plugin-test@v1
         with:
