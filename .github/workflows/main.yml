@@ -25,7 +25,7 @@ jobs:
 
       - name: 🏗️ Create dummy install directories
         run: |
-          ./bin/create-dummy-installs.sh
+          ./test-fixtures/create-dummy-installs.sh
 
       - name: Test parsing 'go.mod'
         run: |
