@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 plugin_dir() {
-    local current_script_path=${BASH_SOURCE[0]}
-    cd "$(dirname "$(dirname "$current_script_path")")" || exit
-    pwd
+  local current_script_path=${BASH_SOURCE[0]}
+  cd "$(dirname "$(dirname "$current_script_path")")" || exit
+  pwd
 }
 
 install_dir() {
@@ -28,14 +28,15 @@ get_legacy_version() {
   current_file="$1"
   basename=$(basename -- "$current_file")
 
-  if [ "$basename" == "go.mod" ]; then
-    GOLANG_VERSION=$(grep 'go\s*[0-9]' "$current_file" |
-                       sed -E \
-                           -e 's/.*heroku goVersion //' \
-                           -e 's/[[:space:]]//' \
-                           -e 's/go([0-9]+).*/\1/' |
-                       head -1
-      )
+  if [[ "$basename" =~ ^go.(mod|work)$ ]]; then
+    GOLANG_VERSION=$(
+      grep 'go\s*[0-9]' "$current_file" |
+        sed -E \
+          -e 's/.*heroku goVersion //' \
+          -e 's/[[:space:]]//' \
+          -e 's/go([0-9]+).*/\1/' |
+        head -1
+    )
   elif [ -e "$current_file" ]; then
     GOLANG_VERSION=$(cat "$current_file")
   else
