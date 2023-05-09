@@ -1,21 +1,55 @@
 #!/usr/bin/env bash
 
+plugin_dir() {
+    local current_script_path=${BASH_SOURCE[0]}
+    cd "$(dirname "$(dirname "$current_script_path")")" || exit
+    pwd
+}
+
+install_dir() {
+  printf -v pdir "%s" "$(plugin_dir)"
+  printf -v plugin_name "%s" "$(basename "$pdir")"
+  printf "%s/installs/%s" "$(dirname "$(dirname "$pdir")")" "$plugin_name"
+}
+
+installed_versions() {
+  local plugin_installs_path
+  plugin_installs_path="$(install_dir)"
+
+  if [ -d "$plugin_installs_path" ]; then
+    for install in "${plugin_installs_path}"/*/; do
+      [[ -e "$install" ]] || break
+      basename "$install" | sed 's/^ref-/ref:/'
+    done
+  fi
+}
+
 get_legacy_version() {
   current_file="$1"
   basename=$(basename -- "$current_file")
 
   if [ "$basename" == "go.mod" ]; then
     GOLANG_VERSION=$(grep 'go\s*[0-9]' "$current_file" |
-                       sed -e 's/.*heroku goVersion //' \
+                       sed -E \
+                           -e 's/.*heroku goVersion //' \
                            -e 's/[[:space:]]//' \
-                           -e 's/go\(.*\)/\1/' |
+                           -e 's/go([0-9]+).*/\1/' |
                        head -1
       )
-  else
+  elif [ -e "$current_file" ]; then
     GOLANG_VERSION=$(cat "$current_file")
+  else
+    GOLANG_VERSION=""
   fi
 
-  asdf list golang | sed -e 's/ //g' | grep "^$GOLANG_VERSION" | sort -V | tail -1
+  local installed
+  installed=$(installed_versions | sed -e 's/ //g' | grep "^$GOLANG_VERSION" | sort -V | tail -1)
+
+  if [ -z "$installed" ]; then
+    installed=$("$(plugin_dir)/bin/latest-stable" "$GOLANG_VERSION")
+  fi
+
+  echo "$installed"
 }
 
 get_legacy_version "$1"

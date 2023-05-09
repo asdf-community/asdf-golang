@@ -1,0 +1,44 @@
+name: CI
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+  
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  plugin_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Test plugin
+        uses: asdf-vm/actions/plugin-test@v1
+        with:
+          command: go version
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run ShellSpec
+        run: |
+          curl -fsSL https://git.io/shellspec | sh -s 0.28.1 -p ./tools -y
+          ./tools/lib/shellspec/bin/shellspec
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run ShellCheck
+        run: shellcheck bin/*

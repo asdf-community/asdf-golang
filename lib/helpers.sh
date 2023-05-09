@@ -17,7 +17,24 @@ get_platform () {
             ;;
     esac
 
-    echo -n "$platform"
+    printf "%s" "$platform"
+}
+
+get_arch () {
+    local arch=""
+    local arch_check=${ASDF_GOLANG_OVERWRITE_ARCH:-"$(uname -m)"}
+    case "${arch_check}" in
+        x86_64|amd64) arch="amd64"; ;;
+        i686|i386|386) arch="386"; ;;
+        armv6l|armv7l) arch="armv6l"; ;;
+        aarch64|arm64) arch="arm64"; ;;
+        ppc64le) arch="ppc64le"; ;;
+        *)
+            fail "Arch '${arch_check}' not supported!"
+            ;;
+    esac
+
+    printf "%s" "$arch"
 }
 
 msg () {
