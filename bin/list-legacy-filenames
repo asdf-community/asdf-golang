@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-case "${ASDF_GOLANG_MOD_VERSION:-}" in
+case "${ASDF_GOLANG_MOD_VERSION_ENABLED:-}" in
 	true)
 		printf ".go-version go.mod go.work\n"
 		;;
@@ -9,7 +9,7 @@ case "${ASDF_GOLANG_MOD_VERSION:-}" in
 		;;
 	*)
 		cat >&2 <<-EOF
-		Notice: Behaving like ASDF_GOLANG_MOD_VERSION=true
+		Notice: Behaving like ASDF_GOLANG_MOD_VERSION_ENABLED=true
 		        In the future this will have to be set to continue
 		        reading from the go.mod and go.work files
 		EOF

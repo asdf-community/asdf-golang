@@ -62,7 +62,7 @@ version with a matching major version. For example, a `go 1.14` directive in a
 selected, not necessarily `1.14.patch`.
 
 **Note**: Users can explicitly exclude or include `go.mod` and `go.work` by
-setting `ASDF_GOLANG_MOD_VERSION`. Currently it defaults to `true`, but that
+setting `ASDF_GOLANG_MOD_VERSION_ENABLED`. Currently it defaults to `true`, but that
 may change in the future, so it should be explicitly set.
 
 ## Architecture Override
