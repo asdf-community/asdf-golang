@@ -8,3 +8,4 @@ function asdf_update_golang_env --on-event fish_prompt
     set -gx GOBIN (dirname "$GOROOT")/packages/bin
   end
 end
+
