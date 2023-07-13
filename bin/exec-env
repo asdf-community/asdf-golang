@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-if [ "${ASDF_INSTALL_VERSION}" != 'system' ] ; then
-	if [[ "unset" == "${GOROOT:-unset}" ]] ; then
-	    export GOROOT=$ASDF_INSTALL_PATH/go
-	fi
+if [ "${ASDF_INSTALL_VERSION}" != 'system' ]; then
+  if [[ "unset" == "${GOROOT:-unset}" ]]; then
+    export GOROOT=$ASDF_INSTALL_PATH/go
+  fi
 
-	if [[ "unset" == "${GOPATH:-unset}" ]] ; then
-	    export GOPATH=$ASDF_INSTALL_PATH/packages
-	fi
+  if [[ "unset" == "${GOPATH:-unset}" ]]; then
+    export GOPATH=$ASDF_INSTALL_PATH/packages
+  fi
 fi

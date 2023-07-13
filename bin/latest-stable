@@ -7,19 +7,19 @@ PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 # shellcheck source=/dev/null
 source "$PLUGIN_DIR/lib/helpers.sh"
 
-command eval "VERSIONS=($("$PLUGIN_DIR"/bin/list-all | tr ' ' '\n' | grep -ivE "(^Available versions:|-src|-dev|-latest|-stm|[-\\.]rc|-alpha|-beta|[-\\.]pre|-next|(a|b|c)[0-9]+|snapshot|master)" | grep "^$1" | sed 's/^[[:space:]]\+//'))"
+command eval "VERSIONS=($("$PLUGIN_DIR"/bin/list-all | tr ' ' '\n' | grep -ivE '(^Available versions:|-src|-dev|-latest|-stm|[-\.]rc|-alpha|-beta|[-\.]pre|-next|(a|b|c)[0-9]+|snapshot|master)' | grep "^$1" | sed 's/^[[:space:]]\+//'))"
 
 platform=$(get_platform true)
 arch=$(get_arch)
 version=""
 
-for (( i=${#VERSIONS[@]}-1; i>=0; i-- )); do
-    version="${VERSIONS[i]}"
-    download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
-    http_code=$(curl -I -w '%{http_code}' -s -o /dev/null "$download_url")
-    if [ "$http_code" -ne 404 ] && [ "$http_code" -ne 403 ]; then
-        break
-    fi
+for ((i = ${#VERSIONS[@]} - 1; i >= 0; i--)); do
+  version="${VERSIONS[i]}"
+  download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
+  http_code=$(curl -I -w '%{http_code}' -s -o /dev/null "$download_url")
+  if [ "$http_code" -ne 404 ] && [ "$http_code" -ne 403 ]; then
+    break
+  fi
 done
 
 printf "%s" "${version}"

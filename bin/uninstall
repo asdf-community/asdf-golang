@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -d "${ASDF_INSTALL_PATH}/packages" ]; then
-    chmod -R u+wx "${ASDF_INSTALL_PATH}/packages"
+  chmod -R u+wx "${ASDF_INSTALL_PATH}/packages"
 fi
 
 rm -rf "${ASDF_INSTALL_PATH}"

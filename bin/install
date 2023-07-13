@@ -7,23 +7,23 @@ PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 # shellcheck source=/dev/null
 source "$PLUGIN_DIR/lib/helpers.sh"
 
-install_golang () {
-    local version="$1"
-    local download_path="$2"
-    local install_path="$3"
-    created_tmp="0"
+install_golang() {
+  local version="$1"
+  local download_path="$2"
+  local install_path="$3"
+  created_tmp="0"
 
-    if [ -z "$download_path" ] ; then
-        download_path=$(mktemp -dt asdf-golang.XXXX)
-        created_tmp="1"
-        ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$PLUGIN_DIR/bin/download"
-    fi
+  if [ -z "$download_path" ]; then
+    download_path=$(mktemp -dt asdf-golang.XXXX)
+    created_tmp="1"
+    ASDF_INSTALL_VERSION="$version" ASDF_DOWNLOAD_PATH="$download_path" "$PLUGIN_DIR/bin/download"
+  fi
 
-    tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
+  tar -C "$install_path" -xzf "${download_path}/archive.tar.gz"
 
-    if [ "1" = "$created_tmp" ]; then
-        rm -r "$download_path"
-    fi
+  if [ "1" = "$created_tmp" ]; then
+    rm -r "$download_path"
+  fi
 }
 
 install_default_go_pkgs() {
@@ -33,32 +33,31 @@ install_default_go_pkgs() {
 
   if [ ! -f "$default_go_pkgs" ]; then return; fi
 
-
   while read -r line; do
-    name=$(echo "$line" | \
-      sed 's|\(.*\) //.*$|\1|' | \
+    name=$(echo "$line" |
+      sed 's|\(.*\) //.*$|\1|' |
       sed -E 's|^[[:space:]]*//.*||') # the first sed is for comments after package names, the second for full line comments
 
     # Skip empty lines
-    if [ -z "$name" ]; then continue ; fi
+    if [ -z "$name" ]; then continue; fi
 
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... " >&2
 
     # if using go > 1.16 then use go install as the preferred donwload path
-    if [ "$go_major_version" -ge 2 ] || [ "${go_minor_version//[!0-9]*}" -ge 16 ]; then
-        if [[ "$name" != *"@"* ]]; then
-            name="${name}@latest"
-        fi
+    if [ "$go_major_version" -ge 2 ] || [ "${go_minor_version//[!0-9]*/}" -ge 16 ]; then
+      if [[ $name != *"@"* ]]; then
+        name="${name}@latest"
+      fi
 
-        GOROOT="$ASDF_INSTALL_PATH/go" \
-            GOPATH="$ASDF_INSTALL_PATH/packages" \
-            PATH="$go_path:$PATH" \
-            go install "$name" > /dev/null && rc=$? || rc=$?
+      GOROOT="$ASDF_INSTALL_PATH/go" \
+        GOPATH="$ASDF_INSTALL_PATH/packages" \
+        PATH="$go_path:$PATH" \
+        go install "$name" >/dev/null && rc=$? || rc=$?
     else
-        GOROOT="$ASDF_INSTALL_PATH/go" \
-            GOPATH="$ASDF_INSTALL_PATH/packages" \
-            PATH="$go_path:$PATH" \
-            go get -u "$name" > /dev/null && rc=$? || rc=$?
+      GOROOT="$ASDF_INSTALL_PATH/go" \
+        GOPATH="$ASDF_INSTALL_PATH/packages" \
+        PATH="$go_path:$PATH" \
+        go get -u "$name" >/dev/null && rc=$? || rc=$?
     fi
 
     if [[ $rc -eq 0 ]]; then
@@ -66,7 +65,7 @@ install_default_go_pkgs() {
     else
       err "FAIL"
     fi
-  done < "$default_go_pkgs"
+  done <"$default_go_pkgs"
 }
 
 install_golang "$ASDF_INSTALL_VERSION" "${ASDF_DOWNLOAD_PATH:-}" "$ASDF_INSTALL_PATH"

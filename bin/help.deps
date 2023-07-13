@@ -8,8 +8,8 @@ PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 source "$PLUGIN_DIR/lib/helpers.sh"
 
 if [ "$(get_platform silent)" = "darwin" ]; then
-    echo "coreutils"
+  echo "coreutils"
 else
-    echo "coreutils"
-    echo "curl"
+  echo "coreutils"
+  echo "curl"
 fi
