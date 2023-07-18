@@ -4,6 +4,8 @@ asdf_update_golang_env() {
   if [[ -n "${go_path}" ]]; then
     export GOROOT
     GOROOT="$(dirname "$(dirname "${go_path:A}")")"
+    export GOBIN
+    GOBIN="$(dirname "${GOROOT}")/packages/bin"
   fi
 }
 

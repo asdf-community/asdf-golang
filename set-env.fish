@@ -4,5 +4,6 @@ function asdf_update_golang_env --on-event fish_prompt
     set --local full_path (builtin realpath "$go_path")
 
     set -gx GOROOT (dirname (dirname "$full_path"))
+    set -gx GOBIN (dirname "$GOROOT")/packages/bin
   end
 end
