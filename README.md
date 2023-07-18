@@ -1,6 +1,6 @@
 # asdf-golang
 
-[![CI](https://github.com/kennyp/asdf-golang/actions/workflows/main.yml/badge.svg)](https://github.com/kennyp/asdf-golang/actions/workflows/main.yml)
+[![CI](https://github.com/asdf-community/asdf-golang/actions/workflows/main.yml/badge.svg)](https://github.com/asdf-community/asdf-golang/actions/workflows/main.yml)
 
 golang plugin for [asdf version manager](https://github.com/asdf-vm/asdf)
 
@@ -18,7 +18,7 @@ golang plugin for [asdf version manager](https://github.com/asdf-vm/asdf)
 ## Install
 
 ```bash
-asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
+asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
 ```
 
 ## Use
@@ -97,7 +97,7 @@ checksum verified
 
 ## Skipping Checksums
 
-By default we try to verify the checksum of each install but ocassionally [that's not possible](https://github.com/kennyp/asdf-golang/issues/91).
+By default we try to verify the checksum of each install but ocassionally [that's not possible](https://github.com/asdf-community/asdf-golang/issues/91).
 If you need to skip the checksum for some reason just set `ASDF_GOLANG_SKIP_CHECKSUM`.
 
 ## Contributing
