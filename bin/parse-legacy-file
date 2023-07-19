@@ -18,7 +18,7 @@ installed_versions() {
 
   if [ -d "$plugin_installs_path" ]; then
     for install in "${plugin_installs_path}"/*/; do
-      [[ -e "$install" ]] || break
+      [[ -e $install ]] || break
       basename "$install" | sed 's/^ref-/ref:/'
     done
   fi
@@ -28,7 +28,7 @@ get_legacy_version() {
   current_file="$1"
   basename=$(basename -- "$current_file")
 
-  if [[ "$basename" =~ ^go.(mod|work)$ ]]; then
+  if [[ $basename =~ ^go.(mod|work)$ ]]; then
     GOLANG_VERSION=$(
       grep 'go\s*[0-9]' "$current_file" |
         sed -E \

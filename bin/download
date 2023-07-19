@@ -8,53 +8,53 @@ PLUGIN_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 source "$PLUGIN_DIR/lib/helpers.sh"
 
 check_shasum() {
-    local archive_file_name=$1
-    local authentic_checksum_file=$2
-    local authentic_checksum=""
+  local archive_file_name=$1
+  local authentic_checksum_file=$2
+  local authentic_checksum=""
 
-    authentic_checksum=$(<"$authentic_checksum_file")
+  authentic_checksum=$(<"$authentic_checksum_file")
 
-    if command -v sha256sum >/dev/null 2>&1; then
-        sha256sum \
-            -c <(echo "$authentic_checksum  $archive_file_name")
-    elif command -v shasum >/dev/null 2>&1; then
-        shasum \
-        -a 256 \
-        -c <(echo "$authentic_checksum  $archive_file_name")
-    else
-        fail "sha256sum or shasum is not available for use"
-    fi
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum \
+      -c <(echo "$authentic_checksum  $archive_file_name")
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum \
+      -a 256 \
+      -c <(echo "$authentic_checksum  $archive_file_name")
+  else
+    fail "sha256sum or shasum is not available for use"
+  fi
 }
 
-download_golang () {
-    local version=$1
-    local download_path=$2
-    local platform=""
-    local arch=""
+download_golang() {
+  local version=$1
+  local download_path=$2
+  local platform=""
+  local arch=""
 
-    platform=$(get_platform)
-    arch=$(get_arch)
-    download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
+  platform=$(get_platform)
+  arch=$(get_arch)
+  download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
 
-    http_code=$(curl -I -w '%{http_code}' -s -o /dev/null "$download_url")
-    if [ "$http_code" -eq 404 ] || [ "$http_code" -eq 403 ]; then
-        fail "URL: ${download_url} returned status ${http_code}"
-    fi
+  http_code=$(curl -I -w '%{http_code}' -s -o /dev/null "$download_url")
+  if [ "$http_code" -eq 404 ] || [ "$http_code" -eq 403 ]; then
+    fail "URL: ${download_url} returned status ${http_code}"
+  fi
 
-    curl "$download_url" -o "${download_path}/archive.tar.gz"
+  curl "$download_url" -o "${download_path}/archive.tar.gz"
 
-    if [ "unset" = "${ASDF_GOLANG_SKIP_CHECKSUM:-unset}" ]; then
-        curl "${download_url}.sha256" -o "${download_path}/archive.tar.gz.sha256"
+  if [ "unset" = "${ASDF_GOLANG_SKIP_CHECKSUM:-unset}" ]; then
+    curl "${download_url}.sha256" -o "${download_path}/archive.tar.gz.sha256"
 
-        echo 'verifying checksum'
-        if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
-            fail "Authenticity of package archive can not be assured. Exiting."
-        else
-          msg "checksum verified"
-        fi
+    echo 'verifying checksum'
+    if ! check_shasum "${download_path}/archive.tar.gz" "${download_path}/archive.tar.gz.sha256"; then
+      fail "Authenticity of package archive can not be assured. Exiting."
     else
-        err "checksum skipped"
+      msg "checksum verified"
     fi
+  else
+    err "checksum skipped"
+  fi
 }
 
 download_golang "$ASDF_INSTALL_VERSION" "$ASDF_DOWNLOAD_PATH"
