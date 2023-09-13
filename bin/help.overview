@@ -10,6 +10,6 @@ source "$PLUGIN_DIR/lib/helpers.sh"
 cat <<-EOM
 	Manage Go installs with ASDF
 
-	- https://github.com/kennyp/asdf-golang/
+	- https://github.com/asdf-community/asdf-golang/
 	- https://golang.org/
 EOM
