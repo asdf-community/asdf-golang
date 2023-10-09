@@ -34,7 +34,7 @@ jobs:
         run: |
           bin/parse-legacy-file test-fixtures/.go-version | grep "^1.17.13"
       - name: Test plugin works to get latest version
-        uses: asdf-vm/actions/plugin-test@v2
+        uses: asdf-vm/actions/plugin-test@v3
         with:
           command: go version
 
