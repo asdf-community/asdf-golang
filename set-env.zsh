@@ -1,9 +1,12 @@
 asdf_update_golang_env() {
-  local go_path
-  go_path="$(asdf which go)"
-  if [[ -n "${go_path}" ]]; then
+  local go_bin_path
+  go_bin_path="$(asdf which go)"
+  if [[ -n "${go_bin_path}" ]]; then
     export GOROOT
-    GOROOT="$(dirname "$(dirname "${go_path:A}")")"
+    GOROOT="$(dirname "$(dirname "${go_bin_path:A}")")"
+
+    export GOPATH
+    GOPATH="$(dirname "${GOROOT:A}")/packages"
   fi
 }
 
