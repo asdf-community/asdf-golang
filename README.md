@@ -33,7 +33,7 @@ To set `GOROOT` in your shell's initialization add the following:
 `. ~/.asdf/plugins/golang/set-env.zsh`  
 
 **fish shell**  
-`. ~/.asdf/plugins/golang/set-env.fish`  
+`source ~/.asdf/plugins/golang/set-env.fish`  
 
 ## When using `go get` or `go install`
 
