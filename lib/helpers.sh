@@ -29,6 +29,7 @@ get_arch() {
     armv6l | armv7l) arch="armv6l" ;;
     aarch64 | arm64) arch="arm64" ;;
     ppc64le) arch="ppc64le" ;;
+    loongarch64 | loong64) arch="loong64" ;;
     *)
       fail "Arch '${arch_check}' not supported!"
       ;;
