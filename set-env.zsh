@@ -9,7 +9,7 @@ asdf_update_golang_env() {
     GOPATH="$(dirname "${GOROOT:A}")/packages"
 
     export GOBIN
-    GOBIN="$(dirname "$(dirname "${go_path:A}")")/bin"
+    GOBIN="$(dirname "${GOROOT:A}")/bin"
   fi
 }
 
