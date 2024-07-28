@@ -44,8 +44,8 @@ install_default_go_pkgs() {
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... " >&2
 
     # if using go > 1.16 then use go install as the preferred donwload path
-    if [ "$go_major_version" -ge 2 ] || [ "${go_minor_version//[!0-9]*}" -ge 16 ]; then
-      if [[ "$name" != *"@"* ]]; then
+    if [ "$go_major_version" -ge 2 ] || [ "${go_minor_version//[!0-9]*/}" -ge 16 ]; then
+      if [[ $name != *"@"* ]]; then
         name="${name}@latest"
       fi
 
