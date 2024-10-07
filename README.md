@@ -39,6 +39,10 @@ To set `GOROOT` in your shell's initialization add the following:
 Add this to your env.nu
 `source ('~/.asdf/plugins/golang/set-env.nu')`
 
+**bash shell**
+Add this to your .bashrc:
+`. ~/.asdf/plugins/golang/set-env.bash` 
+
 ## When using `go get` or `go install`
 
 After using `go get` or `go install` to install a package you need to run `asdf reshim golang` to get any new shims.

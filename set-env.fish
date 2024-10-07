@@ -5,6 +5,6 @@ function asdf_update_golang_env --on-event fish_prompt
 
     set -gx GOROOT (dirname (dirname "$full_path"))
     set -gx GOPATH (dirname "$GOROOT")/packages
-    set -gx GOBIN (dirname "$GOROOT")/packages/bin
+    set -gx GOBIN (dirname "$GOROOT")/bin
   end
 end
