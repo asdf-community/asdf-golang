@@ -51,11 +51,13 @@ install_default_go_pkgs() {
 
       GOROOT="$ASDF_INSTALL_PATH/go" \
         GOPATH="$ASDF_INSTALL_PATH/packages" \
+        GOBIN="$ASDF_INSTALL_PATH/packages/bin" \
         PATH="$go_path:$PATH" \
         go install "$name" >/dev/null && rc=$? || rc=$?
     else
       GOROOT="$ASDF_INSTALL_PATH/go" \
         GOPATH="$ASDF_INSTALL_PATH/packages" \
+        GOBIN="$ASDF_INSTALL_PATH/packages/bin" \
         PATH="$go_path:$PATH" \
         go get -u "$name" >/dev/null && rc=$? || rc=$?
     fi
