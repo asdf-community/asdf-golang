@@ -21,6 +21,14 @@ golang plugin for [asdf version manager](https://github.com/asdf-vm/asdf)
 asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
 ```
 
+```bash
+asdf install golang latest
+```
+
+```bash
+asdf global golang <version>
+```
+
 ## Use
 
 Check the [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of go.
