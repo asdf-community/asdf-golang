@@ -23,25 +23,31 @@ asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
 
 ## Use
 
-Check the [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of go.
+To ensure the Golang environment variables are correctly set when using the `asdf` Go plugin (`asdf-golang`), you should source the appropriate `set-env` script for your shell. This is particularly important if you've customized the `asdf` data directory using the `ASDF_DATA_DIR` environment variable. Below are instructions for various shells:
 
-## `GOROOT`
+- **Zsh (`.zshrc`):**
 
-To set `GOROOT` in your shell's initialization add the following:
+  ```bash
+  . ${ASDF_DATA_DIR:-$HOME/.asdf}/plugins/golang/set-env.zsh
+  ```
 
-**zsh shell**  
-`. ~/.asdf/plugins/golang/set-env.zsh`  
+- **Bash (`.bashrc`):**
 
-**fish shell**  
-`source ~/.asdf/plugins/golang/set-env.fish`  
+  ```bash
+  . ${ASDF_DATA_DIR:-$HOME/.asdf}/plugins/golang/set-env.bash
+  ```
 
-**nushell shell**
-Add this to your env.nu
-`source ('~/.asdf/plugins/golang/set-env.nu')`
+- **Fish (`config.fish`):**
 
-**bash shell**
-Add this to your .bashrc:
-`. ~/.asdf/plugins/golang/set-env.bash` 
+  ```fish
+  source (echo $ASDF_DATA_DIR | if test -z $it; echo $HOME/.asdf; else echo $it; end)/plugins/golang/set-env.fish
+  ```
+
+- **Nushell (`env.nu`):**
+
+  ```nu
+  source (if ($env.ASDF_DATA_DIR | empty?) { echo $nu.env.HOME/.asdf } { echo $env.ASDF_DATA_DIR })/plugins/golang/set-env.nu
+  ```
 
 ## When using `go get` or `go install`
 
