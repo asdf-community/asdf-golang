@@ -9,7 +9,7 @@ get_platform() {
   platform="$(uname | tr '[:upper:]' '[:lower:]')"
 
   case "$platform" in
-    linux | darwin | freebsd)
+    linux | darwin | freebsd | netbsd)
       [ -z "$silent" ] && msg "Platform '${platform}' supported!"
       ;;
     *)
