@@ -21,8 +21,11 @@ check_shasum() {
     shasum \
       -a 256 \
       -c <(echo "$authentic_checksum  $archive_file_name")
+  elif command -v sha256 >/dev/null 2>&1; then
+    sha256 \
+      -c <(echo "SHA256 ($archive_file_name) = $authentic_checksum")
   else
-    fail "sha256sum or shasum is not available for use"
+    fail "no shasum tool available, supported: sha256sum, shasum or sha256"
   fi
 }
 
