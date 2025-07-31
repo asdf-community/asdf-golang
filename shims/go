@@ -35,32 +35,42 @@ resolve_canon_go() {
     return
   fi
 
-  # Current asdf installation
+  # Try PATH
   local go_path
   go_path=$(command -v go 2>/dev/null || true)
-  
+
   if [[ -z "$go_path" || "$go_path" == *"/shims/go" ]]; then
-    # Not found in PATH, find it in the current installation
+    # Try ASDF_INSTALL_PATH
     local install_path="${ASDF_INSTALL_PATH:-}"
     if [[ -n "$install_path" && -x "$install_path/go/bin/go" ]]; then
-      go_path="$install_path/go/bin/go"
-    else
-      # Fallback: find through asdf
-      local current_version
-      current_version=$(asdf current golang 2>/dev/null | awk '{print $2}' || echo "")
-      if [[ -n "$current_version" ]]; then
-        local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
-        go_path="$asdf_data_dir/installs/golang/$current_version/go/bin/go"
+      echo "$install_path/go/bin/go"
+      return
+    fi
+
+    # Try asdf current version
+    local current_version
+    current_version=$(asdf current golang 2>/dev/null | awk '{print $2}' | head -n1)
+    if [[ -n "$current_version" ]]; then
+      local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
+      local asdf_go_path="$asdf_data_dir/installs/golang/$current_version/go/bin/go"
+      if [[ -x "$asdf_go_path" ]]; then
+        echo "$asdf_go_path"
+        return
       fi
     fi
+  elif [[ -x "$go_path" ]]; then
+    echo "$go_path"
+    return
   fi
 
-  if [[ -x "$go_path" ]]; then
-    echo "$go_path"
-  else
-    # Fallback: system go
-    echo "go"
+  if [[ "$(command -v go 2>/dev/null)" == "$0" ]]; then
+    # Avoid recursion
+    echo "Could not resolve real Go binary (recursion detected)." >&2
+    exit 127
   fi
+
+  # Fallback: system go
+  echo "go"
 }
 
 wrap_go_and_reshim() {
