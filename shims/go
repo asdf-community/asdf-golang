@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# This script wraps golang and runs `asdf reshim` after install and get commands.
+# Any other cases are passed-through to golang.
+#
+# To skip reshimming, set the environment variable `ASDF_GOLANG_SKIP_RESHIM=1`.
+#
+# Inspired by asdf-nodejs: https://github.com/asdf-vm/asdf-nodejs/blob/b2d06a768d9a14186db72018df10604bdb384436/shims/npm
+
+should_reshim() {
+  if [[ "${ASDF_GOLANG_SKIP_RESHIM:-}" == "1" ]]; then
+    # Skip reshimming if the environment variable `ASDF_GOLANG_SKIP_RESHIM` is set
+    return 1
+  fi
+
+  for arg in "$@"; do
+    case "$arg" in
+      install)
+        return 0
+        ;;
+      get)
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+resolve_canon_go() {
+  if [[ -n "${ASDF_GOLANG_CANON_GO_PATH:-}" ]]; then
+    echo "$ASDF_GOLANG_CANON_GO_PATH"
+    return
+  fi
+
+  # Current asdf installation
+  local go_path
+  go_path=$(command -v go 2>/dev/null || true)
+  
+  if [[ -z "$go_path" || "$go_path" == *"/shims/go" ]]; then
+    # Not found in PATH, find it in the current installation
+    local install_path="${ASDF_INSTALL_PATH:-}"
+    if [[ -n "$install_path" && -x "$install_path/go/bin/go" ]]; then
+      go_path="$install_path/go/bin/go"
+    else
+      # Fallback: find through asdf
+      local current_version
+      current_version=$(asdf current golang 2>/dev/null | awk '{print $2}' || echo "")
+      if [[ -n "$current_version" ]]; then
+        local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
+        go_path="$asdf_data_dir/installs/golang/$current_version/go/bin/go"
+      fi
+    fi
+  fi
+
+  if [[ -x "$go_path" ]]; then
+    echo "$go_path"
+  else
+    # Fallback: system go
+    echo "go"
+  fi
+}
+
+wrap_go_and_reshim() {
+  local canon_go_path
+  canon_go_path=$(resolve_canon_go)
+
+  if should_reshim "$@"; then
+    # Run original go command
+    "$canon_go_path" "$@"
+    local exit_code=$?
+    
+    if [[ $exit_code -eq 0 ]]; then
+      # Command succeeded, reshim
+      echo "Reshimming asdf golang..." >&2
+      asdf reshim golang
+    fi
+    
+    return $exit_code
+  else
+    # Run original go command, no reshimming needed
+    exec "$canon_go_path" "$@"
+  fi
+}
+
+# Call the wrapper function
+wrap_go_and_reshim "$@"
