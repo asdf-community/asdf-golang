@@ -6,6 +6,7 @@ set -euo pipefail
 # Any other cases are passed-through to golang.
 #
 # To skip reshimming, set the environment variable `ASDF_GOLANG_SKIP_RESHIM=1`.
+# To set go path, use the environment variable `ASDF_GOLANG_CANON_GO_PATH`.
 #
 # Inspired by asdf-nodejs: https://github.com/asdf-vm/asdf-nodejs/blob/b2d06a768d9a14186db72018df10604bdb384436/shims/npm
 
@@ -15,62 +16,49 @@ should_reshim() {
     return 1
   fi
 
-  for arg in "$@"; do
-    case "$arg" in
-      install)
-        return 0
-        ;;
-      get)
-        return 0
-        ;;
-    esac
-  done
+  # Only consider the first arg as the go subcommand to avoid false positives (e.g., `go help install`)
+  local subcmd="${1-}"
+  case "$subcmd" in
+    install)
+      return 0
+      ;;
+  esac
 
   return 1
 }
 
 resolve_canon_go() {
+  local self="${BASH_SOURCE[0]:-$0}"
+
+  # User provided
   if [[ -n "${ASDF_GOLANG_CANON_GO_PATH:-}" ]]; then
-    echo "$ASDF_GOLANG_CANON_GO_PATH"
-    return
-  fi
-
-  # Try PATH
-  local go_path
-  go_path=$(command -v go 2>/dev/null || true)
-
-  if [[ -z "$go_path" || "$go_path" == *"/shims/go" ]]; then
-    # Try ASDF_INSTALL_PATH
-    local install_path="${ASDF_INSTALL_PATH:-}"
-    if [[ -n "$install_path" && -x "$install_path/go/bin/go" ]]; then
-      echo "$install_path/go/bin/go"
+    local p="$ASDF_GOLANG_CANON_GO_PATH"
+    if [[ -x "$p" && "$p" != "$self" && "$p" != *"/shims/go" ]]; then
+      echo "$p"
       return
     fi
+  fi
 
-    # Try asdf current version
-    local current_version
-    current_version=$(asdf current golang 2>/dev/null | awk '{print $2}' | head -n1)
-    if [[ -n "$current_version" ]]; then
-      local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
-      local asdf_go_path="$asdf_data_dir/installs/golang/$current_version/go/bin/go"
-      if [[ -x "$asdf_go_path" ]]; then
-        echo "$asdf_go_path"
-        return
-      fi
+  # Resolve using asdf
+  if command -v asdf >/dev/null 2>&1; then
+    local p
+    p=$(asdf which go 2>/dev/null || true)
+    if [[ -n "$p" && -x "$p" && "$p" != "$self" ]]; then
+      echo "$p"
+      return
     fi
-  elif [[ -x "$go_path" ]]; then
+  fi
+
+  # Fallback to PATH, but avoid recursion
+  local go_path
+  go_path=$(command -v go 2>/dev/null || true)
+  if [[ -n "$go_path" && -x "$go_path" && "$go_path" != "$self" && "$go_path" != *"/shims/go" ]]; then
     echo "$go_path"
     return
   fi
 
-  if [[ "$(command -v go 2>/dev/null)" == "$0" ]]; then
-    # Avoid recursion
-    echo "Could not resolve real Go binary (recursion detected)." >&2
-    exit 127
-  fi
-
-  # Fallback: system go
-  echo "go"
+  echo "Could not resolve real Go binary." >&2
+  exit 127
 }
 
 wrap_go_and_reshim() {
@@ -78,19 +66,23 @@ wrap_go_and_reshim() {
   canon_go_path=$(resolve_canon_go)
 
   if should_reshim "$@"; then
-    # Run original go command
+    # Run original command
     "$canon_go_path" "$@"
     local exit_code=$?
-    
+
     if [[ $exit_code -eq 0 ]]; then
-      # Command succeeded, reshim
-      echo "Reshimming asdf golang..." >&2
-      asdf reshim golang
+      if command -v asdf >/dev/null 2>&1; then
+        # Reshim asdf golang
+        echo "Reshimming asdf golang..." >&2
+        if ! asdf reshim golang; then
+          echo "Warning: asdf reshim failed." >&2
+        fi
+      fi
     fi
-    
+
     return $exit_code
   else
-    # Run original go command, no reshimming needed
+    # No reshim needed, run original command
     exec "$canon_go_path" "$@"
   fi
 }
