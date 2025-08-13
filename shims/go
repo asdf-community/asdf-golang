@@ -49,6 +49,18 @@ resolve_canon_go() {
     fi
   fi
 
+  # Resolve based on current version
+  local current_version
+  current_version=$(asdf current golang 2>/dev/null | awk '{print $2}' | head -n1)
+  if [[ -n "$current_version" ]]; then
+    local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
+    local asdf_go_path="$asdf_data_dir/installs/golang/$current_version/go/bin/go"
+    if [[ -x "$asdf_go_path" ]]; then
+      echo "$asdf_go_path"
+      return
+    fi
+  fi
+
   # Fallback to PATH, but avoid recursion
   local go_path
   go_path=$(command -v go 2>/dev/null || true)
@@ -67,6 +79,7 @@ wrap_go_and_reshim() {
 
   if should_reshim "$@"; then
     # Run original command
+    echo "Running original Go command and reshim:" "$canon_go_path" "$@"
     "$canon_go_path" "$@"
     local exit_code=$?
 
@@ -83,6 +96,7 @@ wrap_go_and_reshim() {
     return $exit_code
   else
     # No reshim needed, run original command
+    echo "Running original Go command:" "$canon_go_path" "$@"
     exec "$canon_go_path" "$@"
   fi
 }
