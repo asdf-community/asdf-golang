@@ -25,7 +25,11 @@ determine_plugin_name() {
   local self="${1:-}"
   local plugin_name=""
 
-  if command -v asdf >/dev/null 2>&1; then
+  if [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
+    plugin_name=$(basename "${ASDF_PLUGIN_PATH}")
+  fi
+
+  if [[ -z "$plugin_name" ]] && command -v asdf >/dev/null 2>&1; then
     # List available plugins
     plugin_name=$(asdf plugin-list | grep -o '[a-zA-Z0-9_-]*' | grep -i golang 2>/dev/null | head -n1)
   fi
@@ -67,13 +71,24 @@ resolve_canon_go() {
   # Determine the plugin name dynamically
   local plugin_name
   plugin_name=$(determine_plugin_name "$self")
+  echo "Plugin name: $plugin_name"
 
-  # Resolve based on current version
   local current_version
-  current_version=$(asdf current "$plugin_name" 2>/dev/null | awk '{print $2}' | head -n1)
+  current_version="${ASDF_INSTALL_VERSION:-$(asdf current "$plugin_name" 2>/dev/null | awk '{print $2}' | head -n1)}"
+
   if [[ -n "$current_version" ]]; then
-    local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
-    local asdf_go_path="$asdf_data_dir/installs/$plugin_name/$current_version/go/bin/go"
+    local install_base_path
+
+    if [[ -n "${ASDF_INSTALL_PATH:-}" ]]; then
+      install_base_path="${ASDF_INSTALL_PATH}"
+    elif [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
+      install_base_path="${ASDF_PLUGIN_PATH%/*}"
+    else
+      local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
+      install_base_path="$asdf_data_dir/"
+    fi
+
+    local asdf_go_path="$install_base_path/installs/$plugin_name/$current_version/go/bin/go"
     if [[ -x "$asdf_go_path" ]]; then
       echo "$asdf_go_path"
       return
@@ -88,7 +103,6 @@ resolve_canon_go() {
     return
   fi
 
-  # Better error message with helpful instructions
   echo "No version of $plugin_name set. Please run one of the following:" >&2
   echo "  asdf global $plugin_name <version>" >&2
   echo "  asdf local $plugin_name <version>" >&2
@@ -98,6 +112,11 @@ resolve_canon_go() {
 }
 
 wrap_go_and_reshim() {
+  echo "ASDF_INSTALL_PATH: $ASDF_INSTALL_PATH"
+  echo "ASDF_PLUGIN_PATH: $ASDF_PLUGIN_PATH"
+  echo "ASDF_DATA_DIR: $ASDF_DATA_DIR"
+  echo "ASDF_INSTALL_VERSION: $ASDF_INSTALL_VERSION"
+
   local canon_go_path
   canon_go_path=$(resolve_canon_go)
 
