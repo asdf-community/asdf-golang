@@ -11,20 +11,35 @@ set -euo pipefail
 # Inspired by asdf-nodejs: https://github.com/asdf-vm/asdf-nodejs/blob/b2d06a768d9a14186db72018df10604bdb384436/shims/npm
 
 should_reshim() {
-  if [[ "${ASDF_GOLANG_SKIP_RESHIM:-}" == "1" ]]; then
-    # Skip reshimming if the environment variable `ASDF_GOLANG_SKIP_RESHIM` is set
-    return 1
-  fi
+  # Skip reshim if ASDF_GOLANG_SKIP_RESHIM is set
+  [[ "${ASDF_GOLANG_SKIP_RESHIM:-}" == "1" ]] && return 1
 
-  # Only consider the first arg as the go subcommand to avoid false positives (e.g., `go help install`)
+  # Handle install command
   local subcmd="${1-}"
-  case "$subcmd" in
-    install)
-      return 0
-      ;;
-  esac
+  [[ "$subcmd" == "install" ]] && return 0
 
   return 1
+}
+
+determine_plugin_name() {
+  local self="${1:-}"
+  local plugin_name=""
+
+  if command -v asdf >/dev/null 2>&1; then
+    # List available plugins
+    plugin_name=$(asdf plugin-list | grep -o '[a-zA-Z0-9_-]*' | grep -i golang 2>/dev/null | head -n1)
+  fi
+
+  if [[ -z "$plugin_name" ]]; then
+    # Extract from directory structure
+    local script_dir
+    script_dir="$(cd "$(dirname "$self")" && pwd)"
+    local plugin_dir
+    plugin_dir="$(cd "$script_dir/.." && pwd)"
+    plugin_name="$(basename "$plugin_dir")"
+  fi
+
+  echo "$plugin_name"
 }
 
 resolve_canon_go() {
@@ -49,12 +64,16 @@ resolve_canon_go() {
     fi
   fi
 
+  # Determine the plugin name dynamically
+  local plugin_name
+  plugin_name=$(determine_plugin_name "$self")
+
   # Resolve based on current version
   local current_version
-  current_version=$(asdf current golang 2>/dev/null | awk '{print $2}' | head -n1)
+  current_version=$(asdf current "$plugin_name" 2>/dev/null | awk '{print $2}' | head -n1)
   if [[ -n "$current_version" ]]; then
     local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
-    local asdf_go_path="$asdf_data_dir/installs/golang/$current_version/go/bin/go"
+    local asdf_go_path="$asdf_data_dir/installs/$plugin_name/$current_version/go/bin/go"
     if [[ -x "$asdf_go_path" ]]; then
       echo "$asdf_go_path"
       return
@@ -69,7 +88,12 @@ resolve_canon_go() {
     return
   fi
 
-  echo "Could not resolve real Go binary." >&2
+  # Better error message with helpful instructions
+  echo "No version of $plugin_name set. Please run one of the following:" >&2
+  echo "  asdf global $plugin_name <version>" >&2
+  echo "  asdf local $plugin_name <version>" >&2
+  echo "  asdf install $plugin_name <version>" >&2
+  echo "See 'asdf list all $plugin_name' for available versions." >&2
   exit 127
 }
 
@@ -77,28 +101,22 @@ wrap_go_and_reshim() {
   local canon_go_path
   canon_go_path=$(resolve_canon_go)
 
-  if should_reshim "$@"; then
-    # Run original command
-    echo "Running original Go command and reshim:" "$canon_go_path" "$@"
-    "$canon_go_path" "$@"
-    local exit_code=$?
-
-    if [[ $exit_code -eq 0 ]]; then
-      if command -v asdf >/dev/null 2>&1; then
-        # Reshim asdf golang
-        echo "Reshimming asdf golang..." >&2
-        if ! asdf reshim golang; then
-          echo "Warning: asdf reshim failed." >&2
-        fi
-      fi
-    fi
-
-    return $exit_code
-  else
-    # No reshim needed, run original command
-    echo "Running original Go command:" "$canon_go_path" "$@"
+  if ! should_reshim "$@"; then
+    # No reshim needed, execute directly
     exec "$canon_go_path" "$@"
   fi
+
+  # Run original command (reshim needed)
+  "$canon_go_path" "$@"
+  local exit_code=$?
+
+  # Only reshim if the command succeeded and asdf is available
+  if [[ $exit_code -eq 0 ]] && command -v asdf >/dev/null 2>&1; then
+    echo "Reshimming asdf golang..." >&2
+    asdf reshim golang || echo "Warning: asdf reshim failed." >&2
+  fi
+
+  return $exit_code
 }
 
 # Call the wrapper function
