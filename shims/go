@@ -112,10 +112,10 @@ resolve_canon_go() {
 }
 
 wrap_go_and_reshim() {
-  echo "ASDF_INSTALL_PATH: $ASDF_INSTALL_PATH"
-  echo "ASDF_PLUGIN_PATH: $ASDF_PLUGIN_PATH"
-  echo "ASDF_DATA_DIR: $ASDF_DATA_DIR"
-  echo "ASDF_INSTALL_VERSION: $ASDF_INSTALL_VERSION"
+  echo "ASDF_INSTALL_PATH: ${ASDF_INSTALL_PATH:-}"
+  echo "ASDF_PLUGIN_PATH: ${ASDF_PLUGIN_PATH:-}"
+  echo "ASDF_DATA_DIR: ${ASDF_DATA_DIR:-}"
+  echo "ASDF_INSTALL_VERSION: ${ASDF_INSTALL_VERSION:-}"
 
   local canon_go_path
   canon_go_path=$(resolve_canon_go)
