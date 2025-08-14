@@ -71,7 +71,6 @@ resolve_canon_go() {
   # Determine the plugin name dynamically
   local plugin_name
   plugin_name=$(determine_plugin_name "$self")
-  echo "Plugin name: $plugin_name"
 
   local current_version
   current_version="${ASDF_INSTALL_VERSION:-$(asdf current "$plugin_name" 2>/dev/null | awk '{print $2}' | head -n1)}"
@@ -85,7 +84,7 @@ resolve_canon_go() {
       install_base_path="${ASDF_PLUGIN_PATH%/*}"
     else
       local asdf_data_dir="${ASDF_DATA_DIR:-$HOME/.asdf}"
-      install_base_path="$asdf_data_dir/"
+      install_base_path="$asdf_data_dir"
     fi
 
     local asdf_go_path="$install_base_path/installs/$plugin_name/$current_version/go/bin/go"
