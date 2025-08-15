@@ -14,9 +14,9 @@ should_reshim() {
   # Skip reshim if ASDF_GOLANG_SKIP_RESHIM is set
   [[ "${ASDF_GOLANG_SKIP_RESHIM:-}" == "1" ]] && return 1
 
-  # Handle install command
+  # Handle install and get commands
   local subcmd="${1-}"
-  [[ "$subcmd" == "install" ]] && return 0
+  [[ "$subcmd" == "install" || "$subcmd" == "get" ]] && return 0
 
   return 1
 }
@@ -26,19 +26,12 @@ determine_plugin_name() {
   local plugin_name=""
 
   if [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
-    echo "Using ASDF_PLUGIN_PATH: ${ASDF_PLUGIN_PATH}" >&2
+    # Plugin path provided
     plugin_name=$(basename "${ASDF_PLUGIN_PATH}")
   fi
 
   if [[ -z "$plugin_name" ]]; then
-    # List available plugins
-    echo "Listing available plugins..." >&2
-    plugin_name=$(asdf plugin-list | grep -o '[a-zA-Z0-9_-]*' | grep -i golang 2>/dev/null | head -n1)
-  fi
-
-  if [[ -z "$plugin_name" ]]; then
     # Extract from directory structure
-    echo "Determining plugin name from directory structure..." >&2
     local script_dir
     script_dir="$(cd "$(dirname "$self")" && pwd)"
     local plugin_dir
@@ -46,11 +39,34 @@ determine_plugin_name() {
     plugin_name="$(basename "$plugin_dir")"
   fi
 
+  if [[ -z "$plugin_name" ]]; then
+    # Default to golang
+    plugin_name="golang"
+  fi
+  
+  if ! command -v asdf >/dev/null 2>&1; then
+    # Return plugin name without validation, asdf is not available
+    echo "$plugin_name"
+    return
+  fi
+
+  # Check if asdf plugin list contains plugin
+  if ! asdf plugin-list | grep -q "^${plugin_name}$"; then
+    echo "Error: Plugin '${plugin_name}' not found in asdf plugin list." >&2
+    exit 1
+  fi
+
   echo "$plugin_name"
 }
 
+__ASDF_GOLANG_SELF="${BASH_SOURCE[0]:-$0}"
+readonly __ASDF_GOLANG_SELF
+__ASDF_GOLANG_PLUGIN_NAME="$(determine_plugin_name "${__ASDF_GOLANG_SELF}")" || __ASDF_GOLANG_PLUGIN_NAME="golang"
+readonly __ASDF_GOLANG_PLUGIN_NAME
+
 resolve_canon_go() {
-  local self="${BASH_SOURCE[0]:-$0}"
+  local self="${__ASDF_GOLANG_SELF}"
+  local plugin_name="${__ASDF_GOLANG_PLUGIN_NAME:-golang}"
 
   # Check if ASDF_GOLANG_CANON_GO_PATH is set and valid
   if [[ -n "${ASDF_GOLANG_CANON_GO_PATH:-}" ]]; then
@@ -70,17 +86,12 @@ resolve_canon_go() {
     return
   fi
 
-  # Determine the plugin name dynamically
-  local plugin_name
-  plugin_name=$(determine_plugin_name "$self")
-
   # Resolve using asdf where
   local p_where
   p_where=$(asdf where "$plugin_name" 2>/dev/null || true)
   if [[ -n "$p_where" ]]; then
     p_where="$p_where/go/bin/go"
     if [[ -x "$p_where" && "$p_where" != "$self" ]]; then
-      echo "Using asdf where golang from: $p_where" >&2
       echo "$p_where"
       return
     fi
@@ -93,13 +104,10 @@ resolve_canon_go() {
     local install_base_path
 
     if [[ -n "${ASDF_INSTALL_PATH:-}" ]]; then
-      echo "Using ASDF_INSTALL_PATH: ${ASDF_INSTALL_PATH}" >&2
       install_base_path="${ASDF_INSTALL_PATH}"
     elif [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
-      echo "Using ASDF_PLUGIN_PATH: ${ASDF_PLUGIN_PATH}" >&2
       install_base_path="${ASDF_PLUGIN_PATH%/*}"
     else
-      echo "Using ASDF_DATA_DIR: ${ASDF_DATA_DIR:-$HOME/.asdf}" >&2
       install_base_path="${ASDF_DATA_DIR:-$HOME/.asdf}"
     fi
 
@@ -115,7 +123,6 @@ resolve_canon_go() {
   local go_path
   go_path=$(command -v go 2>/dev/null || true)
   if [[ -n "$go_path" && -x "$go_path" && "$go_path" != "$self" && "$go_path" != *"/shims/go" ]]; then
-    echo "Using system go from: $go_path" >&2
     echo "$go_path"
     return
   fi
@@ -131,11 +138,17 @@ resolve_canon_go() {
 wrap_go_and_reshim() {
   if ! command -v asdf >/dev/null 2>&1; then
     echo "Warning: asdf command not found. Executing go directly." >&2
-    exec go "$@"
+    exec command go "$@"
   fi
 
+  local plugin_name
+  plugin_name="${__ASDF_GOLANG_PLUGIN_NAME:-golang}"
+
   local canon_go_path
-  canon_go_path=$(resolve_canon_go)
+  canon_go_path=$(resolve_canon_go) || {
+    echo "Error: Failed to resolve Go executable path" >&2
+    exit 1
+  }
 
   if ! should_reshim "$@"; then
     # Execute directly, no reshim needed
@@ -146,12 +159,12 @@ wrap_go_and_reshim() {
   local exit_code=$?
   if [[ $exit_code -eq 0 ]]; then
     # Command succeeded, reshim
-    echo "Reshimming asdf golang..." >&2
-    asdf reshim golang || echo "Warning: asdf reshim failed." >&2
+    echo "Reshimming asdf ${plugin_name}..." >&2
+    asdf reshim "${plugin_name}" || echo "Warning: asdf reshim failed." >&2
   fi
 
   return $exit_code
 }
 
-# Call the wrapper function
+# Entry point
 wrap_go_and_reshim "$@"
