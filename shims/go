@@ -26,16 +26,19 @@ determine_plugin_name() {
   local plugin_name=""
 
   if [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
+    echo "Using ASDF_PLUGIN_PATH: ${ASDF_PLUGIN_PATH}" >&2
     plugin_name=$(basename "${ASDF_PLUGIN_PATH}")
   fi
 
   if [[ -z "$plugin_name" ]]; then
     # List available plugins
+    echo "Listing available plugins..." >&2
     plugin_name=$(asdf plugin-list | grep -o '[a-zA-Z0-9_-]*' | grep -i golang 2>/dev/null | head -n1)
   fi
 
   if [[ -z "$plugin_name" ]]; then
     # Extract from directory structure
+    echo "Determining plugin name from directory structure..." >&2
     local script_dir
     script_dir="$(cd "$(dirname "$self")" && pwd)"
     local plugin_dir
@@ -77,6 +80,7 @@ resolve_canon_go() {
   if [[ -n "$p_where" ]]; then
     p_where="$p_where/go/bin/go"
     if [[ -x "$p_where" && "$p_where" != "$self" ]]; then
+      echo "Using asdf where golang from: $p_where" >&2
       echo "$p_where"
       return
     fi
@@ -89,10 +93,13 @@ resolve_canon_go() {
     local install_base_path
 
     if [[ -n "${ASDF_INSTALL_PATH:-}" ]]; then
+      echo "Using ASDF_INSTALL_PATH: ${ASDF_INSTALL_PATH}" >&2
       install_base_path="${ASDF_INSTALL_PATH}"
     elif [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
+      echo "Using ASDF_PLUGIN_PATH: ${ASDF_PLUGIN_PATH}" >&2
       install_base_path="${ASDF_PLUGIN_PATH%/*}"
     else
+      echo "Using ASDF_DATA_DIR: ${ASDF_DATA_DIR:-$HOME/.asdf}" >&2
       install_base_path="${ASDF_DATA_DIR:-$HOME/.asdf}"
     fi
 
@@ -108,6 +115,7 @@ resolve_canon_go() {
   local go_path
   go_path=$(command -v go 2>/dev/null || true)
   if [[ -n "$go_path" && -x "$go_path" && "$go_path" != "$self" && "$go_path" != *"/shims/go" ]]; then
+    echo "Using system go from: $go_path" >&2
     echo "$go_path"
     return
   fi
