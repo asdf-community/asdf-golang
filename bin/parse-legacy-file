@@ -34,7 +34,7 @@ get_legacy_version() {
         sed -E \
           -e 's/.*heroku goVersion //' \
           -e 's/[[:space:]]//' \
-          -e 's/go([0-9]+.).*/\1/' |
+          -e 's/go([1-9][[:digit:]]*\.[[:digit:]]+\.[[:digit:]]+)/\1/' |
         head -1
     )
   elif [ -e "$current_file" ]; then
