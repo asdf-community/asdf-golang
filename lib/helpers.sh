@@ -39,6 +39,16 @@ get_arch() {
   printf "%s" "$arch"
 }
 
+validate_version() {
+  local version="$1"
+
+  # Check if version matches the pattern major.minor.patch
+  # This allows for versions like 1.21.0, 1.22.1, etc.
+  if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    fail "Invalid version format: '$version'. Go versions must be in the format 'major.minor.patch' (e.g., '1.25.0')."
+  fi
+}
+
 msg() {
   echo -e "\033[32m$1\033[39m" >&2
 }
