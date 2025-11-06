@@ -21,6 +21,14 @@ golang plugin for [asdf version manager](https://github.com/asdf-vm/asdf)
 asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
 ```
 
+```bash
+asdf install golang latest
+```
+
+```bash
+asdf global golang <version>
+```
+
 ## Use
 
 To ensure the Golang environment variables are correctly set when using the `asdf` Go plugin (`asdf-golang`), you should source the appropriate `set-env` script for your shell. This is particularly important if you've customized the `asdf` data directory using the `ASDF_DATA_DIR` environment variable. Below are instructions for various shells:
