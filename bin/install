@@ -34,35 +34,36 @@ install_default_go_pkgs() {
   if [ ! -f "$default_go_pkgs" ]; then return; fi
 
   while read -r line; do
-    name=$(echo "$line" |
-      sed 's|\(.*\) //.*$|\1|' |
-      sed -E 's|^[[:space:]]*//.*||') # the first sed is for comments after package names, the second for full line comments
-
-    # Skip empty lines
-    if [ -z "$name" ]; then continue; fi
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*// ]] && continue
+    
+    # Remove inline comments and trim whitespace
+    name=$(echo "$line" | sed 's|//.*||' | xargs)
+    
+    # Skip if empty after processing
+    [ -z "$name" ] && continue
 
     echo -ne "\nInstalling \033[33m${name}\033[39m go pkg... " >&2
 
-    # if using go > 1.16 then use go install as the preferred donwload path
+    # if using go > 1.16 then use go install as the preferred download path
     if [ "$go_major_version" -ge 2 ] || [ "${go_minor_version//[!0-9]*/}" -ge 16 ]; then
+      go_cmd=(install)
       if [[ $name != *"@"* ]]; then
-        name="${name}@latest"
+        pkg_to_install="${name}@latest"
+      else
+        pkg_to_install="${name}"
       fi
-
-      GOROOT="$ASDF_INSTALL_PATH/go" \
-        GOPATH="$ASDF_INSTALL_PATH/packages" \
-        GOBIN="$ASDF_INSTALL_PATH/bin" \
-        PATH="$go_path:$PATH" \
-        go install "$name" >/dev/null && rc=$? || rc=$?
     else
-      GOROOT="$ASDF_INSTALL_PATH/go" \
-        GOPATH="$ASDF_INSTALL_PATH/packages" \
-        PATH="$go_path:$PATH" \
-        GOBIN="$ASDF_INSTALL_PATH/bin" \
-        go get -u "$name" >/dev/null && rc=$? || rc=$?
+      go_cmd=(get -u)
+      pkg_to_install="${name}"
     fi
 
-    if [[ $rc -eq 0 ]]; then
+    # Execute the go command with common environment
+    if GOROOT="$ASDF_INSTALL_PATH/go" \
+      GOPATH="$ASDF_INSTALL_PATH/packages" \
+      GOBIN="$ASDF_INSTALL_PATH/bin" \
+      PATH="$go_path:$PATH" \
+      go "${go_cmd[@]}" "$pkg_to_install" >/dev/null 2>&1; then
       msg "SUCCESS"
     else
       err "FAIL"
