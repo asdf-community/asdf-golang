@@ -32,6 +32,9 @@ download_golang() {
   local platform=""
   local arch=""
 
+  # Validate version format before attempting download
+  validate_version "$version"
+
   platform=$(get_platform)
   arch=$(get_arch)
   download_url="https://dl.google.com/go/go${version}.${platform}-${arch}.tar.gz"
