@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# This script wraps golang and runs `asdf reshim` after install and get commands.
+# Any other cases are passed-through to golang.
+#
+# To skip reshimming, set the environment variable `ASDF_GOLANG_SKIP_RESHIM=1`.
+# To set go path, use the environment variable `ASDF_GOLANG_CANON_GO_PATH`.
+#
+# Inspired by asdf-nodejs: https://github.com/asdf-vm/asdf-nodejs/blob/b2d06a768d9a14186db72018df10604bdb384436/shims/npm
+
+should_reshim() {
+  # Skip reshim if ASDF_GOLANG_SKIP_RESHIM is set
+  [[ "${ASDF_GOLANG_SKIP_RESHIM:-}" == "1" ]] && return 1
+
+  # Handle install and get commands
+  local subcmd="${1-}"
+  [[ "$subcmd" == "install" || "$subcmd" == "get" ]] && return 0
+
+  return 1
+}
+
+determine_plugin_name() {
+  local self="${1:-}"
+  local plugin_name=""
+
+  if [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
+    # Plugin path provided
+    plugin_name=$(basename "${ASDF_PLUGIN_PATH}")
+  fi
+
+  if [[ -z "$plugin_name" ]]; then
+    # Extract from directory structure
+    local script_dir
+    script_dir="$(cd "$(dirname "$self")" && pwd)"
+    local plugin_dir
+    plugin_dir="$(cd "$script_dir/.." && pwd)"
+    plugin_name="$(basename "$plugin_dir")"
+  fi
+
+  if [[ -z "$plugin_name" ]]; then
+    # Default to golang
+    plugin_name="golang"
+  fi
+  
+  if ! command -v asdf >/dev/null 2>&1; then
+    # Return plugin name without validation, asdf is not available
+    echo "$plugin_name"
+    return
+  fi
+
+  # Check if asdf plugin list contains plugin
+  if ! asdf plugin-list | grep -q "^${plugin_name}$"; then
+    echo "Error: Plugin '${plugin_name}' not found in asdf plugin list." >&2
+    exit 1
+  fi
+
+  echo "$plugin_name"
+}
+
+__ASDF_GOLANG_SELF="${BASH_SOURCE[0]:-$0}"
+readonly __ASDF_GOLANG_SELF
+__ASDF_GOLANG_PLUGIN_NAME="$(determine_plugin_name "${__ASDF_GOLANG_SELF}")" || __ASDF_GOLANG_PLUGIN_NAME="golang"
+readonly __ASDF_GOLANG_PLUGIN_NAME
+
+resolve_canon_go() {
+  local self="${__ASDF_GOLANG_SELF}"
+  local plugin_name="${__ASDF_GOLANG_PLUGIN_NAME:-golang}"
+
+  # Check if ASDF_GOLANG_CANON_GO_PATH is set and valid
+  if [[ -n "${ASDF_GOLANG_CANON_GO_PATH:-}" ]]; then
+    local p="$ASDF_GOLANG_CANON_GO_PATH"
+    if [[ -x "$p" && "$p" != "$self" && "$p" != *"/shims/go" ]]; then
+      echo "$p"
+      return
+    fi
+    echo "Warning: ASDF_GOLANG_CANON_GO_PATH is set but not valid." >&2
+  fi
+
+  # Resolve using asdf which
+  local p_which
+  p_which=$(asdf which go 2>/dev/null || true)
+  if [[ -n "$p_which" && -x "$p_which" && "$p_which" != "$self" ]]; then
+    echo "$p_which"
+    return
+  fi
+
+  # Resolve using asdf where
+  local p_where
+  p_where=$(asdf where "$plugin_name" 2>/dev/null || true)
+  if [[ -n "$p_where" ]]; then
+    p_where="$p_where/go/bin/go"
+    if [[ -x "$p_where" && "$p_where" != "$self" ]]; then
+      echo "$p_where"
+      return
+    fi
+  fi
+
+  # Resolve using asdf current and variables
+  local current_version
+  current_version="${ASDF_INSTALL_VERSION:-$(asdf current "$plugin_name" 2>/dev/null | awk '{print $2}' | head -n1)}"
+  if [[ -n "$current_version" ]]; then
+    local install_base_path
+
+    if [[ -n "${ASDF_INSTALL_PATH:-}" ]]; then
+      install_base_path="${ASDF_INSTALL_PATH}"
+    elif [[ -n "${ASDF_PLUGIN_PATH:-}" ]]; then
+      install_base_path="${ASDF_PLUGIN_PATH%/*}"
+    else
+      install_base_path="${ASDF_DATA_DIR:-$HOME/.asdf}"
+    fi
+
+    local p
+    p="$install_base_path/installs/$plugin_name/$current_version/go/bin/go"
+    if [[ -x "$p" ]]; then
+      echo "$p"
+      return
+    fi
+  fi
+
+  # Fallback to PATH, but avoid recursion
+  local go_path
+  go_path=$(command -v go 2>/dev/null || true)
+  if [[ -n "$go_path" && -x "$go_path" && "$go_path" != "$self" && "$go_path" != *"/shims/go" ]]; then
+    echo "$go_path"
+    return
+  fi
+
+  echo "No version of $plugin_name set. Please run one of the following:" >&2
+  echo "  asdf global $plugin_name <version>" >&2
+  echo "  asdf local $plugin_name <version>" >&2
+  echo "  asdf install $plugin_name <version>" >&2
+  echo "See 'asdf list all $plugin_name' for available versions." >&2
+  exit 127
+}
+
+wrap_go_and_reshim() {
+  if ! command -v asdf >/dev/null 2>&1; then
+    echo "Warning: asdf command not found. Executing go directly." >&2
+    exec command go "$@"
+  fi
+
+  local plugin_name
+  plugin_name="${__ASDF_GOLANG_PLUGIN_NAME:-golang}"
+
+  local canon_go_path
+  canon_go_path=$(resolve_canon_go) || {
+    echo "Error: Failed to resolve Go executable path" >&2
+    exit 1
+  }
+
+  if ! should_reshim "$@"; then
+    # Execute directly, no reshim needed
+    exec "$canon_go_path" "$@"
+  fi
+
+  "$canon_go_path" "$@"
+  local exit_code=$?
+  if [[ $exit_code -eq 0 ]]; then
+    # Command succeeded, reshim
+    echo "Reshimming asdf ${plugin_name}..." >&2
+    asdf reshim "${plugin_name}" || echo "Warning: asdf reshim failed." >&2
+  fi
+
+  return $exit_code
+}
+
+# Entry point
+wrap_go_and_reshim "$@"

@@ -1,4 +1,4 @@
-SRCFILES = $(shell git ls-files "bin/**" "lib/**" "spec/**" "test-fixtures/*.sh")
+SRCFILES = $(shell git ls-files "bin/**" "lib/**" "shims/**" "spec/**" "test-fixtures/*.sh")
 SHFMT_BASE_FLAGS = -s -i 2 -ci
 
 format:

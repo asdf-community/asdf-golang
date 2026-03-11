@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-echo -n "bin go/bin"
+# shims takes precedence over the regular go binary
+echo -n "shims bin go/bin"
