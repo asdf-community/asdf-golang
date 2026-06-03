@@ -43,10 +43,11 @@ To ensure the Golang environment variables are correctly set when using the `asd
   source (echo $ASDF_DATA_DIR | if test -z $it; echo $HOME/.asdf; else echo $it; end)/plugins/golang/set-env.fish
   ```
 
-- **Nushell (`env.nu`):**
+- **Nushell (`config.nu`):**
 
   ```nu
-  source (if ($env.ASDF_DATA_DIR | empty?) { echo $nu.env.HOME/.asdf } { echo $env.ASDF_DATA_DIR })/plugins/golang/set-env.nu
+  # ... Required asdf setup ... (see https://asdf-vm.com/guide/getting-started.html#add-shims-directory-to-path-required-5)
+  source ([$asdf_data_dir plugins golang set-env.nu] | path join)
   ```
 
 ## When using `go get` or `go install`
