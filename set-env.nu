@@ -11,6 +11,6 @@ def --env asdf-update-golang-env [] {
 
 asdf-update-golang-env
 
-$env.config.hooks.env_change.PWD = (
-  $env.config.hooks.env_change | get -o PWD | default [] | prepend {|| asdf-update-golang-env }
+$env.config.hooks.pre_prompt = (
+  $env.config.hooks | get -o pre_prompt | default [] | prepend {|| asdf-update-golang-env }
 )
