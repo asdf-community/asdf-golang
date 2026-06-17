@@ -23,31 +23,7 @@ asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
 
 ## Use
 
-To ensure the Golang environment variables are correctly set when using the `asdf` Go plugin (`asdf-golang`), you should source the appropriate `set-env` script for your shell. This is particularly important if you've customized the `asdf` data directory using the `ASDF_DATA_DIR` environment variable. Below are instructions for various shells:
-
-- **Zsh (`.zshrc`):**
-
-  ```bash
-  . ${ASDF_DATA_DIR:-$HOME/.asdf}/plugins/golang/set-env.zsh
-  ```
-
-- **Bash (`.bashrc`):**
-
-  ```bash
-  . ${ASDF_DATA_DIR:-$HOME/.asdf}/plugins/golang/set-env.bash
-  ```
-
-- **Fish (`config.fish`):**
-
-  ```fish
-  source (echo $ASDF_DATA_DIR | if test -z $it; echo $HOME/.asdf; else echo $it; end)/plugins/golang/set-env.fish
-  ```
-
-- **Nushell (`env.nu`):**
-
-  ```nu
-  source (if ($env.ASDF_DATA_DIR | empty?) { echo $nu.env.HOME/.asdf } { echo $env.ASDF_DATA_DIR })/plugins/golang/set-env.nu
-  ```
+Previous versions of this plugin required sourcing a script in order to set your Golang environment variables. This is no longer required as it is managed through integrations with ASDF.
 
 ## When using `go get` or `go install`
 

@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
 if [ "${ASDF_INSTALL_VERSION}" != 'system' ]; then
-  if [[ "unset" == "${GOROOT:-unset}" ]]; then
+  # The GOROOT and GOBIN should always point to the current ASDF go.
+  if [[ ${GOROOT:-} != $ASDF_INSTALL_PATH/go ]]; then
     export GOROOT=$ASDF_INSTALL_PATH/go
   fi
-
-  if [[ "unset" == "${GOPATH:-unset}" ]]; then
-    export GOPATH=$ASDF_INSTALL_PATH/packages
+  if [[ ${GOBIN:-} != $ASDF_INSTALL_PATH/bin ]]; then
+      export GOBIN=$ASDF_INSTALL_PATH/bin
   fi
 
-  if [[ "unset" == "${GOBIN:-unset}" ]]; then
-    export GOBIN=$ASDF_INSTALL_PATH/bin
+  # GOPATH should be set by the user to point at their go code. Only set it if
+  # it is unset.
+  if [[ "unset" == "${GOPATH:-unset}" ]]; then
+    export GOPATH=$ASDF_INSTALL_PATH/packages
   fi
 fi
