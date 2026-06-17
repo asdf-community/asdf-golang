@@ -37,6 +37,8 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v4
         with:
           command: go version
+          giturl: ${{ github.event.pull_request.head.repo.clone_url || github.event.repository.clone_url }}
+          gitref: ${{ github.event.pull_request.head.ref || github.sha }}
 
       - name: Checkout code
         uses: actions/checkout@v6
